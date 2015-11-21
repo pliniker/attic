@@ -1,2 +1,3 @@
-# attic
-Code from way back
+# My attic
+
+Mementos from the mid-90s.
