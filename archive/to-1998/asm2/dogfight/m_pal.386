@@ -1,0 +1,59 @@
+
+%out * * * M_PAL.386 * * *
+; New palette list
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+Palette LABEL BYTE
+db 0,8,16 ; sky
+db 24,24,24 ; clouds
+db 63,63,63 ; moon
+db 0,16,0 ; ground
+
+z=0             
+REPT 64
+db z,0,0
+z=z+1
+ENDM
+z=0
+REPT 64
+db z,z,0
+z=z+1
+ENDM
+z=0
+REPT 64
+db z,z,z
+z=z+1
+ENDM
+z=0
+REPT 64
+db z,0,z
+z=z+1
+ENDM
+
+%out SetPalette
+; change palette macro > segment of list, offset of list
+SetPalette PROC NEAR
+    mov  cx,256
+    mov  ah,0
+DACLoadLoop:
+    mov  dx,03C8h
+    mov  al,ah
+    cli
+    out  dx,al       ;set the DAC location #
+    mov  dx,03C9h
+    lodsb
+    out  dx,al       ;set the red component
+    lodsb
+    out  dx,al       ;set the green component
+    lodsb
+    out  dx,al       ;set the blue component
+    sti
+    inc  ah
+    loop DACLoadLoop
+    ret
+SetPalette ENDP
+
+
+Code ENDS

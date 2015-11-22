@@ -1,0 +1,16 @@
+
+DRVLoad PROC NEAR    
+    SetDs @data
+    OpenFile    DrvName,00h
+    mov  bx,4
+    call IfError
+    mov  DrvHandle,ax
+    ReadFile    DrvHandle,@data,DrvBuffer,31688
+    mov  bx,4
+    call IfError
+    CloseFile   DrvHandle
+    mov  bx,4
+    call IfError
+    ret
+DRVLoad ENDP
+

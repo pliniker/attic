@@ -1,0 +1,70 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * Bank.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+<font color=#0000FF>import</font> java.util.Vector;
+
+<font color=#0000FF>public</font> <font color=#0000FF>interface</font> Bank <font color=#0000FF>extends</font> java.rmi.Remote 
+{
+	<font color=#9A1900>// Group Types for use in openAccount
+</font>	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>   CARTOGRAPHER     = <font color=#CC33CC>4096</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>   ROBOT            = <font color=#CC33CC>2048</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>   SERVICEPROVIDER  = <font color=#CC33CC>1024</font>;
+	
+        <font color=#9A1900>// Some constants
+</font>	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> String SERVERPATH            = <font color=#FF0000>"rmi://texel25.doc.ic.ac.uk:5001"</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>    TIMEPENALTY           = <font color=#CC33CC>10</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>    ACCURACYPENALTY       = <font color=#CC33CC>10</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>    OVERDRAFTLIMIT        = -<font color=#CC33CC>10000</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>    OVERDRAWNFINE         = <font color=#CC33CC>10</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font>    INTERESTTIMEBASE      = <font color=#CC33CC>5</font>;
+	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>float</font>  INTERESTRATE          = (<font color=#009900>float</font>)<font color=#CC33CC>0.01</font>;
+ 	<font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>float</font>  OVERDRAWNINTERESTRATE = (<font color=#009900>float</font>)<font color=#CC33CC>0.01</font>;
+ 
+ 	<font color=#9A1900>// Open new account and register for all other services
+</font>	<font color=#9A1900>// returns your account number for use in getBalance
+</font>	<font color=#9A1900>// and in Auction API
+</font>	<font color=#0000FF>public</font> <font color=#009900>int</font> openAccount(String Name, <font color=#009900>int</font> groupType, <font color=#009900>int</font> groupNumber) 
+			<font color=#0000FF>throws</font> java.rmi.RemoteException;
+	
+	<font color=#9A1900>// Get current balance of your account
+</font>	<font color=#0000FF>public</font> <font color=#009900>int</font> getBalance(<font color=#009900>int</font> accountNum) 
+			<font color=#0000FF>throws</font> java.rmi.RemoteException, InvalidAccountNoException;
+	
+        <font color=#9A1900>// Gets the average difference in time taken from time predicted for
+</font>	<font color=#9A1900>// a robot with RobotNo to map a given area
+</font>	<font color=#0000FF>public</font> <font color=#009900>long</font>  getTimeReputation(<font color=#009900>int</font> RobotNo) 
+			<font color=#0000FF>throws</font> java.rmi.RemoteException, InvalidAccountNoException;
+
+	<font color=#9A1900>// Gets the average accuracy
+</font>	<font color=#9A1900>// a robot with RobotNo to map a given area
+</font>	<font color=#0000FF>public</font> <font color=#009900>int</font>   getAccuracyReputation(<font color=#009900>int</font> RobotNo) 
+			<font color=#0000FF>throws</font> java.rmi.RemoteException, InvalidAccountNoException;
+
+	<font color=#9A1900>// Ignore this, for internal use only
+</font>	<font color=#0000FF>public</font> <font color=#009900>int</font>   getNextRegionID() <font color=#0000FF>throws</font> java.rmi.RemoteException;
+	
+	<font color=#9A1900>// Returns a vector of all cartographers in system
+</font>	<font color=#0000FF>public</font> Vector getCartographers() <font color=#0000FF>throws</font> java.rmi.RemoteException;
+	
+
+}
+
+
+
+
+
+
+
+
+</tt>
+</pre>

@@ -1,0 +1,123 @@
+;
+; last updated 09-04-97
+;
+; Instructions which do not take operands and are not available in TASM.
+; extra 8086/286/386/486/Pentium/Pentium Pro instructions.
+;
+;
+; !!! discovered TASM 2.0 does 486 instructions 10/04/97 !!!
+.486P
+;
+; returns the ID of the CPU / Pentium & some 486;
+;
+cpuid		MACRO id
+        mov  ecx,id
+		db 00Fh,0A2h
+		ENDM
+;		
+; read model specific register / 486
+;
+rdmsr		MACRO reg
+		mov  ecx,reg
+		db 00Fh,032h
+		ENDM
+;		
+; write model specific register / 486
+;
+wrmsr		MACRO reg
+		mov  ecx,reg
+		db 00Fh,030h
+		ENDM
+;		
+; read time stamp counter / 486
+;
+rdtsc		MACRO
+		db 00Fh,031h
+		ENDM
+;		
+; return from system management mode / 386
+;
+rsm		MACRO
+		db 00Fh,0AAh
+		ENDM
+;
+; float.point conditional move / Pentium Pro 
+;		
+fcmovb		MACRO st
+		db 0DAh,0C0h+st
+		ENDM
+fcmove		MACRO st
+		db 0DAh,0C8h+st
+		ENDM
+fcmovbe		MACRO st
+		db 0DAh,0D0h+st
+		ENDM
+fcmovu		MACRO st
+		db 0DAh,0D8h+st
+		ENDM
+fcmovnb		MACRO st
+		db 0DBh,0C0h+st
+		ENDM
+fcmovne		MACRO st
+		db 0DBh,0C8h+st
+		ENDM
+fcmovnbe	MACRO st
+		db 0DBh,0C8h+st
+		ENDM
+fcmovnu		MACRO st
+		db 0DBh,0C8h+st
+		ENDM
+;
+; f.point compare registers, store in EFLAGS / Pentium Pro
+;
+fcomi		MACRO st
+		db 0DBh,0F0h+st
+		ENDM
+fcomip		MACRO st
+		db 0DFh,0F0h+st
+		ENDM
+fucomi		MACRO st
+		db 0DBh,0E8h+st
+		ENDM
+fccomip		MACRO st
+		db 0DFh,0E8h+st
+		ENDM
+;
+; read performance monitor counter / Pentium Pro
+;
+rdpmc		MACRO 		
+		xor  ecx,ecx
+		db 00Fh,033h
+		ENDM
+;
+; ascii adjust division / 8086
+;
+aad_u		MACRO Ib
+		db 0D5h,Ib
+		ENDM
+;		
+; ascii adjust multiply / 8086
+;
+aam_u		MACRO Ib
+		db 0D4h,Ib
+		ENDM
+;		
+; load entire CPU state / 386
+;
+loadall		MACRO
+		db 00Fh,007h
+		ENDM
+;		
+; set al to carry flag / 286
+;
+setalc		MACRO
+		db 0D6h
+		ENDM
+;		
+; system management interrupt / 386(AMD only???)
+;
+smi		MACRO
+		db 0F1h
+		ENDM
+		
+		

@@ -1,0 +1,594 @@
+
+; this program can easily be modified to play 8 channels or any number
+; required
+
+;-------------------------------------------------------------------------
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code
+
+OldHandlerSeg dw 0                          ; save the address of the old
+OldHandlerOfs dw 0                          ; handler to be restored at end
+
+SetTimerOn PROC NEAR                        ; procedure to set the timer
+    cli                                     ; to my own handler
+    mov  al,36h
+    out  43h,al
+    mov  ax,bpm
+    out  40h,al
+    shr  ax,8
+    out  40h,al
+
+    mov  al,08h
+    mov  ah,35h
+    int  21h                                ; dos function getintvec
+    mov  OldHandlerSeg,es                   ; to get addr of old handler
+    mov  OldHandlerOfs,bx
+
+    mov  dx,seg IRQHandler
+    mov  ds,dx
+    mov  dx,offset IRQHandler
+    mov  al,08h
+    mov  ah,25h
+    int  21h                                ; dos func setintvec to rerout
+    sti                                     ; the int to my handler
+    ret
+SetTimerOn ENDP
+;-------------------------------------------------------------------------
+SetTimerOff PROC FAR                        ; procedure to restore the old
+    cli                                     ; handler at the end of the
+    mov  dx,OldHandlerSeg                   ; program
+    mov  ds,dx
+    mov  dx,OldHandlerOfs
+    mov  al,08h
+    mov  ah,25h
+    int  21h
+
+    mov  al,36h
+    out  43h,al
+    mov  al,0
+    out  40h,al
+    out  40h,al
+    sti
+
+    mov  al,20h
+    out  20h,al
+
+    mov  ax,0003h
+    int  10h
+
+    SetDs MusicSeg
+    OpenFile    Diefile,00h
+    jc   ummm
+    mov  IHandle,ax
+    ReadFile    IHandle,InstrData,15949
+    CloseFile   IHandle
+    call SBReset
+    call SpeakerON
+    call PlaySample
+
+    SetDs Code
+    mov  dx,offset EndMsg
+    mov  ah,09h
+    int  21h
+ummm:
+    call OldKeyboardHandler
+
+    mov  ah,4Ch
+    int  21h
+    ret
+SetTimerOff ENDP
+
+EndMsg  db 'Peter Liniker 1996, 1997, 2000',13,10,'$'
+
+;-------------------------------------------------------------------------
+
+PlayMixer PROC NEAR                         ; procedure to play the mixer
+    SetDs MusicSeg
+    xor  eax,eax
+    xor  edx,edx
+                                            ; it first decides whether
+    mov  al,5h                              ; the first or the second
+    out  0Ah,al                             ; mixer is to be played
+    mov  al,0
+    out  0Ch,al
+    mov  al,49h
+    out  0Bh,al
+
+    cmp  _currentmixer,-2
+    je   PlayMixer2
+    mov  ax,seg Mixer1
+    shl  eax,4
+    add  ax,offset Mixer1
+    jmp  OverPlay
+PlayMixer2:
+    mov  ax,seg Mixer2
+    shl  eax,4
+    add  ax,offset Mixer2
+OverPlay:
+
+    out  02h,al                             ; then plays the mixer
+    shr  eax,8
+    out  02h,al
+    shr  eax,8
+    out  83h,al
+    shr  eax,8
+    mov  dx,483h
+    out  dx,al
+
+    mov  ax,_mixerlength
+    out  03h,al
+    shr  ax,8
+    out  03h,al
+
+    DSPWrite 40h
+    DSPWrite samplerate
+
+    DSPWrite 14h
+    mov  bx,_mixerlength
+    sub  bl,1
+    sub  bh,1
+    DSPWrite bl
+    DSPWrite bh
+
+    mov  al,1
+    out  0Ah,al
+
+    ret
+PlayMixer ENDP
+;-------------------------------------------------------------------------
+ClearMixer PROC NEAR                        ; clears the mixer
+    push es
+    SetReg es,MusicSeg                      ; (fills the mixer with 0's)
+    cmp  _currentmixer,2                    
+    je   ToMixer2
+    mov  di,offset Mixer1                   ; first decides which mixer 
+    jmp  Over                               ; to clear
+ToMixer2:
+    mov  di,offset Mixer2   
+Over:
+    mov  al,0
+    mov  cx,_mixerlength
+    cld
+    rep  stosb
+    pop  es
+    ret
+ClearMixer ENDP
+;-------------------------------------------------------------------------
+WriteInstr2Mixer1 PROC NEAR                 ; instr to the current mixer
+
+    cmp  _currentmixer,2
+    je   WriteMixer1
+    mov  si,offset Mixer1
+    jmp  OverWrite1
+WriteMixer1:
+    mov  si,offset Mixer2   
+OverWrite1:
+    
+    xor  bx,bx
+    mov  bl,_note1
+    mov  edx,NoteTable[bx]
+    mov  ecx,edx
+
+    mov  _mixpos,_mixerlength
+
+    xor  edx,edx
+    xor  eax,eax
+
+    mov  bx,_sample1
+    shl  bx,1
+    mov  di,_samplelength[bx]
+    mov  _smplen,di
+
+WriteLoop1:
+    mov  al,InstrData[di]
+    mul  _volume1
+    shr  ax,6
+    mov  ah,[si]
+    add  al,ah
+    mov  [si],al
+
+    add  edx,ecx
+    mov  eax,edx
+    shr  eax,16
+    mov  di,ax
+
+    cmp  di,_smplen
+    jae  ExitWriteLoop1
+    add  di,_sampleoffsets[bx]
+    add  di,_smpofs1
+    inc  si
+    dec  _mixpos
+    jnz  WriteLoop1
+ExitWriteLoop1:
+    mov  _smpofs1,di
+    mov  ax,_sampleoffsets[bx]
+    sub  _smpofs1,ax
+    ret
+WriteInstr2Mixer1 ENDP
+;-------------------------------------------------------------------------
+WriteInstr2Mixer2 PROC NEAR                 ; to the mixer
+
+    cmp  _currentmixer,2
+    je   WriteMixer2
+    mov  si,offset Mixer1
+    jmp  OverWrite2
+WriteMixer2:
+    mov  si,offset Mixer2   
+OverWrite2:
+    
+    xor  bx,bx
+    mov  bl,_note2
+    mov  edx,NoteTable[bx]
+    mov  ecx,edx
+
+    mov  _mixpos,_mixerlength
+
+    xor  edx,edx
+    xor  eax,eax
+
+    mov  bx,_sample2
+    shl  bx,1
+    mov  di,_samplelength[bx]
+    mov  _smplen,di
+
+WriteLoop2:
+    mov  al,InstrData[di]
+    mul  _volume2
+    shr  ax,6
+    mov  ah,[si]
+    add  al,ah
+    mov  [si],al
+
+    add  edx,ecx
+    mov  eax,edx
+    shr  eax,16
+    mov  di,ax
+
+    cmp  di,_smplen
+    jae  ExitWriteLoop2
+    add  di,_sampleoffsets[bx]
+    add  di,_smpofs2
+    inc  si
+    dec  _mixpos
+    jnz  WriteLoop2
+ExitWriteLoop2:
+    mov  _smpofs2,di
+    mov  ax,_sampleoffsets[bx]
+    sub  _smpofs2,ax
+    ret
+WriteInstr2Mixer2 ENDP
+;-------------------------------------------------------------------------
+
+WriteInstr2Mixer3 PROC NEAR                 ; to the mixer
+
+    cmp  _currentmixer,2
+    je   WriteMixer3
+    mov  si,offset Mixer1
+    jmp  OverWrite3
+WriteMixer3:
+    mov  si,offset Mixer2   
+OverWrite3:
+    
+    xor  bx,bx
+    mov  bl,_note3
+    mov  edx,NoteTable[bx]
+    mov  ecx,edx
+
+    mov  _mixpos,_mixerlength
+
+    xor  edx,edx
+    xor  eax,eax
+
+    mov  bx,_sample3
+    shl  bx,1
+    mov  di,_samplelength[bx]
+    mov  _smplen,di
+
+WriteLoop3:
+    mov  al,InstrData[di]
+    mul  _volume3  
+    shr  ax,6
+    mov  ah,[si]
+    add  al,ah
+    mov  [si],al
+
+    add  edx,ecx
+    mov  eax,edx
+    shr  eax,16
+    mov  di,ax
+
+    cmp  di,_smplen
+    jae  ExitWriteLoop3 
+    add  di,_sampleoffsets[bx]
+    add  di,_smpofs3
+    inc  si
+    dec  _mixpos
+    jnz  WriteLoop3
+ExitWriteLoop3:
+    mov  _smpofs3,di
+    mov  ax,_sampleoffsets[bx]
+    sub  _smpofs3,ax
+    ret
+WriteInstr2Mixer3 ENDP
+;-------------------------------------------------------------------------
+
+WriteInstr2Mixer4 PROC NEAR                 ; to the mixer
+
+    cmp  _currentmixer,2
+    je   WriteMixer4
+    mov  si,offset Mixer1
+    jmp  OverWrite4
+WriteMixer4:
+    mov  si,offset Mixer2   
+OverWrite4:
+    
+    xor  bx,bx
+    mov  bl,_note4
+    mov  edx,NoteTable[bx]
+    mov  ecx,edx
+
+    mov  _mixpos,_mixerlength
+
+    xor  edx,edx
+    xor  eax,eax
+
+    mov  bx,_sample4
+    shl  bx,1
+    mov  di,_samplelength[bx]
+    mov  _smplen,di
+
+WriteLoop4:
+    mov  al,InstrData[di]
+    mul  _volume4   
+    shr  ax,6
+    mov  ah,[si]
+    add  al,ah
+    mov  [si],al
+
+    add  edx,ecx
+    mov  eax,edx
+    shr  eax,16
+    mov  di,ax
+
+    cmp  di,_smplen
+    jae  ExitWriteLoop4 
+    add  di,_sampleoffsets[bx]
+    add  di,_smpofs4
+    inc  si
+    dec  _mixpos
+    jnz  WriteLoop4
+ExitWriteLoop4:
+    mov  _smpofs4,di
+    mov  ax,_sampleoffsets[bx]
+    sub  _smpofs4,ax
+    ret
+WriteInstr2Mixer4 ENDP
+
+; ------------------------------------------------------------------
+PlayNote PROC FAR                           ; the next note from the 
+                                            ; data string, decide
+    call PlayMixer                          ; whether to continue the
+                                            ; last note, set the volume
+    mov  di,_muspos                         ; change the instrument number
+;    add  di,offset MusicData
+                                            ; to be played
+    mov  dl,_note1                          ; then call the playmixer
+    mov  al,es:[di]                   ; function
+    mov  _note1,al
+    cmp  _note1,_
+    je   SkipTheRest1
+    cmp  _note1,endsong
+    je   EndHandler2
+
+    inc  di
+    xor  ax,ax
+    mov  al,es:[di]
+    mov  _sample1,ax
+    inc  di
+    mov  al,es:[di]
+    mov  _volume1,al
+    inc  di
+    mov  _smpofs1,0
+
+    jmp  OverTheRest1
+SkipTheRest1:
+    add  di,2
+    mov  _note1,dl
+    mov  al,es:[di]
+    mov  _volume1,al
+    inc  di
+    
+OverTheRest1:
+    mov  _muspos,di 
+    call ClearMixer
+    call WriteInstr2Mixer1
+; -*-*-*-*-
+    mov  di,_muspos
+
+    mov  dl,_note2
+    mov  al,es:[di]
+    mov  _note2,al
+    cmp  _note2,_
+    je   SkipTheRest2
+
+    inc  di
+    xor  ax,ax
+    mov  al,es:[di]
+    mov  _sample2,ax
+    inc  di
+    mov  al,es:[di]
+    mov  _volume2,al
+    inc  di
+    mov  _smpofs2,0
+
+    jmp  OverTheRest2
+SkipTheRest2:
+    add  di,2
+    mov  _note2,dl
+    mov  al,es:[di]
+    mov  _volume2,al
+    inc  di
+    
+OverTheRest2:
+    mov  _muspos,di 
+    call WriteInstr2Mixer2
+; -*-*-*-*-
+    mov  di,_muspos
+
+    mov  dl,_note3
+    mov  al,es:[di]
+    mov  _note3,al
+    cmp  _note3,_
+    je   SkipTheRest3
+
+    inc  di
+    xor  ax,ax
+    mov  al,es:[di]
+    mov  _sample3,ax
+    inc  di
+    mov  al,es:[di]
+    mov  _volume3,al
+    inc  di
+    mov  _smpofs3,0
+
+    jmp  OverTheRest3
+SkipTheRest3:
+    add  di,2
+    mov  _note3,dl
+    mov  al,es:[di]
+    mov  _volume3,al
+    inc  di
+    
+OverTheRest3:
+    mov  _muspos,di 
+    call WriteInstr2Mixer3
+; -*-*-*-*-
+    mov  di,_muspos
+
+    mov  dl,_note4
+    mov  al,es:[di]
+    mov  _note4,al
+    cmp  _note4,_
+    je   SkipTheRest4
+
+    inc  di
+    xor  ax,ax
+    mov  al,es:[di]
+    mov  _sample4,ax
+    inc  di
+    mov  al,es:[di]
+    mov  _volume4,al
+    inc  di
+    mov  _smpofs4,0
+
+    jmp  OverTheRest4
+SkipTheRest4:
+    add  di,2
+    mov  _note4,dl
+    mov  al,es:[di]
+    mov  _volume4,al
+    inc  di
+    
+OverTheRest4:
+    mov  _muspos,di 
+    call WriteInstr2Mixer4
+
+    neg  _currentmixer
+
+    jmp  EndHandler1
+EndHandler2:
+    mov  _muspos,offset MusicData
+EndHandler1:
+    ret
+PlayNote ENDP
+
+;-------------------------------------------------------------------------
+
+IRQHandler PROC FAR                     ; Interrupt handler for IRQ 0
+    pusha                               ; this is the timer handler
+    push ds                            
+    push es                             
+SetDs MusicSeg
+SetReg es,MusicDat
+inc  _counter
+cmp  _counter,speed
+je   Skipnote
+jmp  Overnote
+Skipnote:
+call Playnote
+mov  _counter,0
+;inc  _notecounter
+cmp  _notecounter,songlength
+je   EndMusic
+Overnote:
+    pop  es
+    pop  ds
+    popa
+    mov  al,20h
+    out  20h,al
+    iret
+EndMusic:
+    call SetTimerOff
+    pop  es
+    pop  ds
+    popa
+    mov  al,20h
+    out  20h,al
+    iret
+IRQHandler ENDP
+
+;-------------------------------------------------------------------------
+
+LoadInstr MACRO ofs,len
+local IFNOTEXISTS
+    SetDs MusicSeg
+    OpenFile    IName,00h
+    jc   IFNOTEXISTS
+    mov  IHandle,ax
+    ReadFile    IHandle,InstrData[ofs],len
+    CloseFile   IHandle
+IFNOTEXISTS:
+    ENDM    
+NewInstr MACRO num
+    SetDs MusicSeg
+    mov  al,num
+    mov  IName[6],al
+    ENDM
+LoadInstrs PROC NEAR
+    NewInstr '0'
+    LoadInstr 0,I0
+    NewInstr '1'
+    LoadInstr I0,I1
+    NewInstr '2'
+    LoadInstr I0+I1,I2
+    NewInstr '3'
+    LoadInstr I0+I1+I2,I3 
+    NewInstr '4'         
+    LoadInstr I0+I1+I2+I3,I4
+    NewInstr '5'
+    LoadInstr I0+I1+I2+I3+I4,I5
+    NewInstr '6'
+    LoadInstr I0+I1+I2+I3+I4+I5,I6
+    NewInstr '7'
+    LoadInstr I0+I1+I2+I3+I4+I5+I6,I7
+    NewInstr '8'
+    LoadInstr I0+I1+I2+I3+I4+I5+I6+I7,I8
+    NewInstr '9'
+    LoadInstr I0+I1+I2+I3+I4+I5+I6+I7+I8,I9
+    ret
+LoadInstrs ENDP
+; ------------------------------------------------------------------
+
+ClearSamples PROC NEAR
+    SetReg es,MusicSeg
+    mov  di,offset InstrData
+    mov  al,0
+    mov  cx,60000
+    cld
+    rep  stosb
+    ret
+ClearSamples ENDP
+; ------------------------------------------------------------------
+
+Code ENDS

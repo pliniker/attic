@@ -1,0 +1,107 @@
+
+.386
+
+DecP equ '.'
+
+return MACRO
+    mov  WorkSpace[0],13
+    mov  WorkSpace[1],10
+    mov  WorkSpace[2],'$'
+    mov  ah,09h
+    mov  dx,offset WorkSpace
+    int  21h
+    ENDM
+
+OutH MACRO
+    mov  WorkSpace[0],'h'
+    mov  WorkSpace[1],'$'
+    mov  WorkSpace[2],'$'
+    mov  ah,09h
+    mov  dx,offset WorkSpace
+    int  21h
+    ENDM
+
+OutHex8 MACRO var
+    pusha
+    xor  bx,bx
+    mov  bl,var
+    call OutHex
+    OutH
+    popa
+    ENDM
+
+OutHex16 MACRO var
+    pusha
+    xor  bx,bx
+    mov  ax,var
+    mov  bx,ax
+    shr  bx,8
+    call OutHex
+    mov  bx,ax
+    call OutHex
+    OutH
+    popa
+    ENDM
+
+OutHex32 MACRO var
+    pusha
+    xor  ebx,ebx
+    mov  eax,var
+    mov  ebx,eax
+    shr  ebx,24
+    call OutHex
+    mov  ebx,eax
+    shr  ebx,16
+    call OutHex
+    mov  ebx,eax
+    shr  ebx,8
+    call OutHex
+    mov  ebx,eax
+    call OutHex
+    OutH
+    popa
+    ENDM
+
+Code    SEGMENT 'CODE' WORD USE16 PUBLIC
+        ASSUME  cs:Code,ds:Code
+
+WorkSpace db 32 dup (?)
+
+MemFree db 0,0,'$'
+
+OutHex PROC NEAR
+    push ds
+    pusha
+    push bx
+
+    and  bx,0000000011110000b
+    shr  bx,4
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE9A
+    jmp  SKIPA
+ABOVE9A:
+    add  bl,7
+SKIPA:
+    mov  MemFree[0],bl
+    pop  bx
+    and  bx,0000000000001111b
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE9B
+    jmp  SKIPB
+ABOVE9B:
+    add  bl,7
+SKIPB:
+    mov  MemFree[1],bl
+
+    mov  ah,09h
+    mov  dx,offset MemFree
+    int  21h
+
+    popa
+    pop  ds
+    ret
+OutHex ENDP
+
+Code ENDS

@@ -1,0 +1,136 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#9A1900>/**
+ * CartographerImpl.java
+ *
+ *
+ * Created: Fri Jun  8 13:31:19 2001
+ *
+ * @author Gus Paul
+ * @version
+ */</font>
+
+<font color=#0000FF>import</font> java.rmi.*;
+<font color=#0000FF>import</font> java.rmi.server.*;
+<font color=#0000FF>import</font> java.util.*; 
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> CartographerImpl <font color=#0000FF>implements</font> Cartographer {
+    <font color=#0000FF>static</font> AuctionServer auction;  <font color=#9A1900>//these variables are static so that there is only one per instantiated class 
+</font>    <font color=#0000FF>static</font> Bank bank;              <font color=#9A1900>//also, this means that methods in class can access these variables.  Set them in
+</font>    <font color=#0000FF>static</font> <font color=#009900>int</font> myID;               <font color=#9A1900>//the constructor for this class
+</font>    <font color=#9A1900>//myId is your account number 
+</font>    
+    <font color=#0000FF>public</font> CartographerImpl() {
+	<font color=#9A1900>//Constructor
+</font>	<font color=#0000FF>super</font>();
+	<font color=#0000FF>try</font> {
+            UnicastRemoteObject.exportObject(<font color=#0000FF>this</font>);
+        }
+        <font color=#0000FF>catch</font>(RemoteException re) {
+            re.printStackTrace();
+	}
+    }
+
+
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getBid(Lot lot) <font color=#0000FF>throws</font> RemoteException{
+	System.out.println(<font color=#FF0000>"Cartographer: getBid"</font>);
+	<font color=#9A1900>//decide your bid.  I've chosen an arbitrary value here.
+</font>
+	<font color=#0000FF>return</font> <font color=#CC33CC>1000</font>;
+    }
+
+    <font color=#0000FF>public</font> <font color=#009900>void</font> auctionResult(Lot lot, <font color=#009900>int</font> reason) <font color=#0000FF>throws</font> RemoteException{
+    }
+
+    <font color=#0000FF>public</font> <font color=#009900>void</font> youWon(Lot lot) <font color=#0000FF>throws</font> RemoteException{
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>void</font> youLost(Lot lot) <font color=#0000FF>throws</font> RemoteException{
+    }
+
+    <font color=#0000FF>public</font> <font color=#009900>void</font> quotesReady(Vector quotes) <font color=#0000FF>throws</font> RemoteException{
+	<font color=#9A1900>//System.out.println("Cartographer: quotesReady");
+</font>	<font color=#9A1900>//chose which quote to accept. I've just chosen to accept quote 0, hence the break statement.   
+</font>	
+	Quote oneIwant = <font color=#0000FF>null</font>;
+	<font color=#0000FF>if</font> (quotes.size() == <font color=#CC33CC>0</font>)
+	    ;<font color=#9A1900>//no quotes submitted so re submit or whatever
+</font>	<font color=#0000FF>else</font>{
+	    <font color=#0000FF>for</font>(<font color=#009900>int</font> i = <font color=#CC33CC>0</font>; i&lt;quotes.size() ; i++){
+		<font color=#9A1900>//choose quote 
+</font>		oneIwant = (Quote) quotes.get(<font color=#CC33CC>0</font>);
+		<font color=#0000FF>break</font>;
+	    }
+	    <font color=#0000FF>try</font>{
+		System.out.println(<font color=#FF0000>"Accepting quote"</font>);
+		auction.acceptQuote(oneIwant, myID);
+	    }
+	    <font color=#0000FF>catch</font>(InvalidAccountNoException e){
+		System.out.println(myID);
+	    }
+	    <font color=#0000FF>catch</font>(RemoteException e){
+		e.printStackTrace();
+	    }
+	    <font color=#0000FF>catch</font>(Exception e){
+	    }
+	}
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>void</font> contractMade(<font color=#009900>int</font> cartID, <font color=#009900>int</font> robotID, Quote quote) <font color=#0000FF>throws</font> RemoteException
+    {}
+    <font color=#0000FF>public</font> <font color=#009900>void</font> submitRegion(Region region, <font color=#009900>int</font> accuracy) <font color=#0000FF>throws</font> RemoteException{
+	<font color=#9A1900>//System.out.println("Cartographer: submitRegion");
+</font>    }
+
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#009900>void</font> main(String argv[]){
+	<font color=#0000FF>try</font>{
+	    <font color=#9A1900>//This main does not have to be in this class - it should be wherever your main method ends up
+</font>	    <font color=#9A1900>//which is up to individual group
+</font>	    auction = (AuctionServer)Naming.lookup(Bank.SERVERPATH+ <font color=#FF0000>"/Auction"</font>);
+	    <font color=#9A1900>//getting the address of the auction server. Change localhost to the name of the machine server is running on
+</font>	    bank= (Bank)Naming.lookup(Bank.SERVERPATH + <font color=#FF0000>"/Bank"</font>);
+	    <font color=#9A1900>//getting the address of the bank server. Change localhost to the name of machine server is running on.
+</font>	
+	    
+	    myID = bank.openAccount(<font color=#FF0000>"Cartographer"</font>, Bank.CARTOGRAPHER, <font color=#CC33CC>0</font> <font color=#9A1900>/*or 1 or 2*/</font>);
+	    <font color=#9A1900>//open a new bank account.  The string can say anything you want - it comes up on your statement.
+</font>	    <font color=#9A1900>//The group number(the third parameter) is your group number as on Ian's webpage.
+</font>	    
+	    CartographerImpl cart = <font color=#0000FF>new</font> CartographerImpl();
+	    <font color=#9A1900>//create a new object that can be passed to auction server
+</font>	    
+	    auction.register(cart, myID);
+	    System.out.println(myID);
+	    <font color=#9A1900>// register the object with the auction server, using you account number
+</font>
+	    <font color=#9A1900>//put any code here that willcall methods on the server etc.  up to you to decide what and how often.
+</font>
+	    <font color=#9A1900>// e.g. Uncomment this code to test whether contracts work
+</font>	    <font color=#9A1900>//// Region r = new Region();
+</font>	    <font color=#9A1900>// auction.submitJob(r, myID);
+</font>
+	}
+
+	<font color=#0000FF>catch</font>(RemoteException e){
+	    System.out.println(<font color=#FF0000>"Cartographer: Remote Exception: Could not find Auction Server."</font>);
+	    e.printStackTrace();
+	}
+	<font color=#0000FF>catch</font>(Exception e){
+	    System.out.println(e);
+	    e.printStackTrace();
+	}
+    }
+
+} <font color=#9A1900>// CartographerImp
+</font>
+
+
+
+
+
+
+
+</tt>
+</pre>

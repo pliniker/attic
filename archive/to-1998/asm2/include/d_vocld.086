@@ -1,0 +1,17 @@
+
+; last updated: 20-01-96
+
+VOCLoad PROC NEAR
+    SetDs @code
+    OpenFile    VOCName,00h
+    mov  VOCHandle,ax
+    mov  bx,2
+    call IfError
+    ReadFile    VOCHandle,@code,VOCBuffer,64000
+    mov  bx,2
+    call IfError
+    CloseFile   VOCHandle
+    mov  bx,2
+    call IfError
+    ret
+VOCLoad ENDP

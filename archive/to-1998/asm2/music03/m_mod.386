@@ -1,0 +1,201 @@
+
+SLength equ 20000
+
+i0 equ 10000
+i1 equ 20000
+i2 equ 20000
+i3 equ 10000
+i4 equ 10000
+i5 equ 10000
+i6 equ 10000
+i7 equ 10000
+i8 equ 10000
+i9 equ  5000
+
+C1  equ 0
+Cs1 equ 4
+D1  equ 8 
+Ds1 equ 12
+E1  equ 16
+F1  equ 20
+Fs1 equ 24
+G1  equ 28
+Gs1 equ 32
+A1  equ 36
+As1 equ 40
+B1  equ 44
+C2  equ 48
+Cs2 equ 52
+D2  equ 56
+Ds2 equ 60
+E2  equ 64
+F2  equ 68
+Fs2 equ 72
+G2  equ 76
+Gs2 equ 80
+A2  equ 84
+As2 equ 88
+B2  equ 92
+C3  equ 96
+Cs3 equ 100
+D3  equ 104
+Ds3 equ 108
+E3  equ 112
+F3  equ 116
+Fs3 equ 120
+G3  equ 124
+Gs3 equ 128
+A3  equ 132
+As3 equ 136
+B3  equ 140
+C4  equ 144
+_   equ 0FEh
+endsong equ 0FFh
+
+
+; * * * * * sampledata 2 * * * * * *
+Samples1    SEGMENT WORD 'SMPS' USE32
+
+SName           db 'sample0.raw',0
+SHandle         dw 0
+
+NoteTable       dd  08000h, 0879Ch, 08FACh, 09837h
+                dd  0A145h, 0AADCh, 0B505h, 0BF86h
+                dd  0CB2Fh, 0D744h, 0E411h, 0F1A1h
+                dd  10000h, 10F38h, 11F59h, 13070h
+                dd  1428Ah, 155B8h, 16A09h, 17F91h
+                dd  1965Fh, 1AE89h, 1C824h, 1E343h
+                dd  20000h, 21E72h, 23EB3h, 260DFh
+                dd  28514h, 2AB70h, 2D413h, 2FF21h
+                dd  32CBFh, 35D14h, 39047h, 3C686h
+                dd  40000h
+
+; individual sample data
+SLengths        dw i0,i1,i2,i3,i4,i5,i6,i7,i8,i9
+
+SOffsets        dd 0, i0, i0+i1, i0+i1+i2, i0+i1+i2+i3, i0+i1+i2+i3+i4
+                dd i0+i1+i2+i3+i4+i5, i0+i1+i2+i3+i4+i5+i6
+                dd i0+i1+i2+i3+i4+i5+i6+i7, i0+i1+i2+i3+i4+i5+i6+i7+i8
+
+; channel & note data
+CurrentChannel  dw 0
+C_Notes         db 16 dup(0)
+C_Volumes       db 16 dup(0)
+C_Instrs        db 16 dup(0)
+
+; temporary sample buffer
+SData           db 64000 dup (?);
+
+; permanent sample buffer
+; 1Meg + 64k to clear the maximum memory area used by DOS
+AddOffset       equ (1024*1024) +65536
+SamplesData     LABEL BYTE
+
+Samples1    ENDS
+
+;***************************************************************************
+;                           CODE SEGMENT
+;***************************************************************************
+.386
+Code        SEGMENT WORD 'CODE' USE16 PUBLIC
+    ASSUME cs:Code
+
+; ***************************************************************************
+
+; Miscellaneous procedures to test the sample data
+; clear the sample data
+ClearData PROC NEAR
+    push es
+    ASSUME es:Samples1
+    mov  ax,Samples1
+    mov  es,ax
+    mov  di,offset SData
+    mov  cx,SLength
+    mov  al,0
+    cld
+    rep  stosb
+    pop  es
+    ret
+ClearData ENDP
+
+GetSample MACRO snum
+; copy the sample data back from real mem
+
+    mov  bx,snum
+    shl  bx,1
+    mov  cx,SLengths[bx]
+    shl  bx,1
+    mov  esi,SOffsets[bx]
+
+    mov  edx,offset SamplesData + AddOffset
+    add  edx,esi
+    mov  bx,offset SData
+
+    CopyBlock_RMEM_to_DOS Samples1,edx, Samples1,bx, cx
+    ENDM
+
+; ***************************************************************************
+
+; instrument loading procedures
+%out instrument loading
+LoadSample MACRO segment,ofs,len
+local IFNOTEXISTS
+    push ds
+    ASSUME ds:segment
+    mov  ax,segment
+    mov  ds,ax
+    OpenFile    SName,00h
+    jc   IFNOTEXISTS
+    mov  SHandle,ax
+    ReadFile    SHandle,[ofs],len
+    CloseFile   SHandle
+IFNOTEXISTS:
+    pop  ds
+    ENDM    
+
+NewInstr MACRO num
+    push ds
+    SetDs Samples1
+    mov  al,num
+    mov  SName[6],al
+    pop  ds
+    ENDM
+
+; load a single instrument
+LoadInstr MACRO ofs,len
+; load the sample
+    LoadSample Samples1,SData,len
+; copy the sample data to real mem
+    mov  dx,offset SData        
+    mov  ebx,offset SamplesData[ofs+AddOffset]
+    CopyBlock_DOS_to_RMEM Samples1,dx, Samples1,ebx, len
+    ENDM
+
+; load all the instruments
+LoadInstruments PROC NEAR
+    NewInstr '0'
+    LoadInstr 0,i0
+    NewInstr '1'
+    LoadInstr 0+i0,i1
+    NewInstr '2'
+    LoadInstr 0+i0+i1,i2
+    NewInstr '3'
+    LoadInstr 0+i0+i1+i2,i3
+    NewInstr '4'
+    LoadInstr 0+i0+i1+i2+i3,i4
+    NewInstr '5'
+    LoadInstr 0+i0+i1+i2+i3+i4,i5
+    NewInstr '6'
+    LoadInstr 0+i0+i1+i2+i3+i4+i5,i6
+    NewInstr '7'
+    LoadInstr 0+i0+i1+i2+i3+i4+i5+i6,i7
+    NewInstr '8'
+    LoadInstr 0+i0+i1+i2+i3+i4+i5+i6+i7,i8
+    NewInstr '9'
+    LoadInstr 0+i0+i1+i2+i3+i4+i5+i6+i7+i8,i9
+    ret
+LoadInstruments ENDP
+
+; ***************************************************************************
+
+Code ENDS

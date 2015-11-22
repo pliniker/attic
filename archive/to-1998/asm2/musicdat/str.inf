@@ -1,0 +1,14 @@
+
+i0 equ 20000    ; strings
+i1 equ 20000    ; light strings
+i2 equ 0
+i3 equ 10000    ; pizzicato
+i4 equ 0
+i5 equ 0
+i6 equ 0
+i7 equ 0
+i8 equ 0
+i9 equ 0
+
+
+include music.dat

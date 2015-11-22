@@ -1,0 +1,88 @@
+
+SLength equ 20000
+
+i0 equ 10000
+i1 equ 20000
+i2 equ 20000
+i3 equ 10000
+i4 equ 10000
+i5 equ 10000
+i6 equ 10000
+i7 equ 10000
+i8 equ 10000
+i9 equ  5000
+
+C1  equ 0
+Cs1 equ 4
+D1  equ 8 
+Ds1 equ 12
+E1  equ 16
+F1  equ 20
+Fs1 equ 24
+G1  equ 28
+Gs1 equ 32
+A1  equ 36
+As1 equ 40
+B1  equ 44
+C2  equ 48
+Cs2 equ 52
+D2  equ 56
+Ds2 equ 60
+E2  equ 64
+F2  equ 68
+Fs2 equ 72
+G2  equ 76
+Gs2 equ 80
+A2  equ 84
+As2 equ 88
+B2  equ 92
+C3  equ 96
+Cs3 equ 100
+D3  equ 104
+Ds3 equ 108
+E3  equ 112
+F3  equ 116
+Fs3 equ 120
+G3  equ 124
+Gs3 equ 128
+A3  equ 132
+As3 equ 136
+B3  equ 140
+C4  equ 144
+_   equ 0FEh
+endsong equ 0FFh
+
+
+; sampledata 2
+Samples1    SEGMENT WORD 'SMPS' USE32
+
+SName           db 'sample0.raw',0
+SHandle         dw 0
+
+NoteTable       dd  08000h, 0879Ch, 08FACh, 09837h
+                dd  0A145h, 0AADCh, 0B505h, 0BF86h
+                dd  0CB2Fh, 0D744h, 0E411h, 0F1A1h
+                dd  10000h, 10F38h, 11F59h, 13070h
+                dd  1428Ah, 155B8h, 16A09h, 17F91h
+                dd  1965Fh, 1AE89h, 1C824h, 1E343h
+                dd  20000h, 21E72h, 23EB3h, 260DFh
+                dd  28514h, 2AB70h, 2D413h, 2FF21h
+                dd  32CBFh, 35D14h, 39047h, 3C686h
+                dd  40000h
+
+SLengths        dw i0,i1,i2,i3,i4,i5,i6,i7,i8,i9
+
+; individual sample data
+SOffsets        dd 0*65536,1*65536,2*65536,3*65536,4*65536
+                dd 5*65536,6*65536,7*65536,8*65536,9*65536
+                dd 10*65536,11*65536,12*65536,13*64436,14*65536
+                dd 15*65536
+
+SData           db 60000 dup (?);
+
+
+AddOffset       equ (1024*1024) +65536
+
+SamplesData     LABEL BYTE
+
+Samples1    ENDS

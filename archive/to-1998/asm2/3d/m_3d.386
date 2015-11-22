@@ -1,0 +1,133 @@
+; 3D matrices & transformation routines
+; requires M_MATHS.386
+
+Code    SEGMENT WORD 'CODE' USE16 PUBLIC
+    assume  cs:Code,ds:Code,es:Code
+
+include objects.dat
+
+ViewPixel MACRO px,py,pc
+    mov  si,py
+    imul si,320
+    add  si,px
+    mov  es:[si],pc
+    ENDM
+
+_Cosine     dd 0
+_Sine       dd 0
+_Object     dw 0
+_Angle      dw 0
+
+; Rotate point around X axis
+RotX PROC NEAR                  ; y = ycos - zsin
+    CosSin _Angle               ; z = ysin + zcos
+    mov  _Cosine,eax
+    mov  _Sine,edx
+    mov  si,_Object
+
+    mov  ebx,[si+4]
+    FPMul ebx,_Cosine
+    mov  ecx,eax
+    mov  ebx,[si+8]
+    FPMul ebx,_Sine
+    sub  ecx,eax
+    push ecx
+
+    mov  ebx,[si+4]
+    FPMul ebx,_Sine
+    mov  ecx,eax
+    mov  ebx,[si+8]
+    FPMul ebx,_Cosine
+    add  ecx,eax
+    mov  [si+8],ecx
+
+    pop  ecx
+    mov  [si+4],ecx
+    ret
+RotX ENDP
+
+; Rotate point around Y axis
+RotY PROC NEAR                  ; x = xcos + zsin
+    CosSin _Angle               ; z = -xsin + zcos
+    mov  _Cosine,eax
+    mov  _Sine,edx
+    mov  si,_Object
+
+    mov  ebx,[si]
+    FPMul ebx,_Cosine
+    mov  ecx,eax
+    mov  ebx,[si+8]
+    FPMul ebx,_Sine
+    add  ecx,eax
+    push ecx
+
+    mov  ebx,[si]
+    neg  ebx
+    FPMul ebx,_Sine
+    mov  ecx,eax
+    mov  ebx,[si+8]
+    FPMul ebx,_Cosine
+    add  ecx,eax
+    mov  [si+8],ecx
+
+    pop  ecx
+    mov  [si],ecx
+    ret
+RotY ENDP
+
+; Rotate point around Z axis
+RotZ PROC NEAR                  ; x = xcos - ysin
+    CosSin _Angle               ; y = xsin + ycos
+    mov  _Cosine,eax
+    mov  _Sine,edx
+    mov  si,_Object
+
+    mov  ebx,[si]
+    FPMul ebx,_Cosine
+    mov  ecx,eax
+    mov  ebx,[si+4]
+    FPMul ebx,_Sine
+    sub  ecx,eax
+    push ecx
+
+    mov  ebx,[si]
+    FPMul ebx,_Sine
+    mov  ecx,eax
+    mov  ebx,[si+4]
+    FPMul ebx,_Cosine
+    add  eax,ecx
+    mov  [si+4],eax
+
+    pop  ecx
+    mov  [si],ecx
+    ret
+RotZ ENDP
+
+; view the coordinate as a point on the screen
+ViewAsPixel  MACRO   vector,world
+    mov  si,offset vector
+    mov  eax,[si]
+    mov  ebx,[si+4]
+    mov  ecx,[si+8]
+
+    mov  si,offset world
+    add  eax,[si]
+    add  ebx,[si+4]
+    add  ecx,[si+8]
+
+    FPDiv eax,ecx
+    push eax
+    FPDiv ebx,ecx
+    mov  ebx,eax
+    pop  eax
+
+    sar  eax,16
+    sar  ebx,16
+    mov  cl,14
+    add  ax,160
+    add  bx,100
+    ViewPixel ax,bx,cl
+
+    ENDM
+
+Code ENDS

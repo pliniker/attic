@@ -1,0 +1,461 @@
+; Maths include file, uses 386 registers
+; a 386 processor minimum required
+.386
+
+Cosine dd 010000h   ; Cosine table 0 to 360 degrees
+
+     dd 0fff6h
+     dd 0ffd8h
+     dd 0ffa6h
+     dd 0ff60h
+     dd 0ff07h
+     dd 0fe99h
+     dd 0fe18h
+     dd 0fd82h
+     dd 0fcd9h
+     dd 0fc1ch
+     dd 0fb4ch
+     dd 0fa68h
+     dd 0f970h
+     dd 0f865h
+     dd 0f747h
+     dd 0f615h
+     dd 0f4d0h
+     dd 0f378h
+     dd 0f20eh
+     dd 0f090h
+     dd 0eeffh
+     dd 0ed5ch
+     dd 0eba6h
+     dd 0e9deh
+     dd 0e804h
+     dd 0e617h
+     dd 0e419h
+     dd 0e209h
+     dd 0dfe7h
+     dd 0ddb4h
+     dd 0db6fh
+     dd 0d91ah
+     dd 0d6b3h
+     dd 0d43ch
+     dd 0d1b4h
+     dd 0cf1ch
+     dd 0cc73h
+     dd 0c9bbh
+     dd 0c6f3h
+     dd 0c41bh
+     dd 0c135h
+     dd 0be3fh
+     dd 0bb3ah
+     dd 0b827h
+     dd 0b505h
+     dd 0b1d5h
+     dd 0ae97h
+     dd 0ab4ch
+     dd 0a7f3h
+     dd 0a48eh
+     dd 0a11bh
+     dd 09d9ch
+     dd 09a11h
+     dd 09679h
+     dd 092d6h
+     dd 08f27h
+     dd 08b6dh
+     dd 087a9h
+     dd 083dah
+     dd 08000h
+     dd 07c1ch
+     dd 0782fh
+     dd 07439h
+     dd 07039h
+     dd 06c31h
+     dd 06820h
+     dd 06407h
+     dd 05fe6h
+     dd 05bbeh
+     dd 0578fh
+     dd 05358h
+     dd 04f1ch
+     dd 04ad9h
+     dd 04690h
+     dd 04242h
+     dd 03defh
+     dd 03996h
+     dd 0353ah
+     dd 030d9h
+     dd 02c74h
+     dd 0280ch
+     dd 023a1h
+     dd 01f33h
+     dd 01ac2h
+     dd 01650h
+     dd 011dch
+     dd 00d66h
+     dd 008efh
+     dd 00478h
+     dd 00000h
+
+     dd -00478h
+     dd -008efh
+     dd -00d66h
+     dd -011dch
+     dd -01650h
+     dd -01ac2h
+     dd -01f33h
+     dd -023a1h
+     dd -0280ch
+     dd -02c74h
+     dd -030d9h
+     dd -0353ah
+     dd -03996h
+     dd -03defh
+     dd -04242h
+     dd -04690h
+     dd -04ad9h
+     dd -04f1ch
+     dd -05358h
+     dd -0578fh
+     dd -05bbeh
+     dd -05fe6h
+     dd -06407h
+     dd -06820h
+     dd -06c31h
+     dd -07039h
+     dd -07439h
+     dd -0782fh
+     dd -07c1ch
+     dd -08000h
+     dd -083dah
+     dd -087a9h
+     dd -08b6dh
+     dd -08f27h
+     dd -092d6h
+     dd -09679h
+     dd -09a11h
+     dd -09d9ch
+     dd -0a11bh
+     dd -0a48eh
+     dd -0a7f3h
+     dd -0ab4ch
+     dd -0ae97h
+     dd -0b1d5h
+     dd -0b505h
+     dd -0b827h
+     dd -0bb3ah
+     dd -0be3fh
+     dd -0c135h
+     dd -0c41bh
+     dd -0c6f3h
+     dd -0c9bbh
+     dd -0cc73h
+     dd -0cf1ch
+     dd -0d1b4h
+     dd -0d43ch
+     dd -0d6b3h
+     dd -0d91ah
+     dd -0db6fh
+     dd -0ddb4h
+     dd -0dfe7h
+     dd -0e209h
+     dd -0e419h
+     dd -0e617h
+     dd -0e804h
+     dd -0e9deh
+     dd -0eba6h
+     dd -0ed5ch
+     dd -0eeffh
+     dd -0f090h
+     dd -0f20eh
+     dd -0f378h
+     dd -0f4d0h
+     dd -0f615h
+     dd -0f747h
+     dd -0f865h
+     dd -0f970h
+     dd -0fa68h
+     dd -0fb4ch
+     dd -0fc1ch
+     dd -0fcd9h
+     dd -0fd82h
+     dd -0fe18h
+     dd -0fe99h
+     dd -0ff07h
+     dd -0ff60h
+     dd -0ffa6h
+     dd -0ffd8h
+     dd -0fff6h
+     dd -010000h
+
+     dd -0fff6h
+     dd -0ffd8h
+     dd -0ffa6h
+     dd -0ff60h
+     dd -0ff07h
+     dd -0fe99h
+     dd -0fe18h
+     dd -0fd82h
+     dd -0fcd9h
+     dd -0fc1ch
+     dd -0fb4ch
+     dd -0fa68h
+     dd -0f970h
+     dd -0f865h
+     dd -0f747h
+     dd -0f615h
+     dd -0f4d0h
+     dd -0f378h
+     dd -0f20eh
+     dd -0f090h
+     dd -0eeffh
+     dd -0ed5ch
+     dd -0eba6h
+     dd -0e9deh
+     dd -0e804h
+     dd -0e617h
+     dd -0e419h
+     dd -0e209h
+     dd -0dfe7h
+     dd -0ddb4h
+     dd -0db6fh
+     dd -0d91ah
+     dd -0d6b3h
+     dd -0d43ch
+     dd -0d1b4h
+     dd -0cf1ch
+     dd -0cc73h
+     dd -0c9bbh
+     dd -0c6f3h
+     dd -0c41bh
+     dd -0c135h
+     dd -0be3fh
+     dd -0bb3ah
+     dd -0b827h
+     dd -0b505h
+     dd -0b1d5h
+     dd -0ae97h
+     dd -0ab4ch
+     dd -0a7f3h
+     dd -0a48eh
+     dd -0a11bh
+     dd -09d9ch
+     dd -09a11h
+     dd -09679h
+     dd -092d6h
+     dd -08f27h
+     dd -08b6dh
+     dd -087a9h
+     dd -083dah
+     dd -08000h
+     dd -07c1ch
+     dd -0782fh
+     dd -07439h
+     dd -07039h
+     dd -06c31h
+     dd -06820h
+     dd -06407h
+     dd -05fe6h
+     dd -05bbeh
+     dd -0578fh
+     dd -05358h
+     dd -04f1ch
+     dd -04ad9h
+     dd -04690h
+     dd -04242h
+     dd -03defh
+     dd -03996h
+     dd -0353ah
+     dd -030d9h
+     dd -02c74h
+     dd -0280ch
+     dd -023a1h
+     dd -01f33h
+     dd -01ac2h
+     dd -01650h
+     dd -011dch
+     dd -00d66h
+     dd -008efh
+     dd -00478h
+     dd -00000h
+
+     dd 00478h
+     dd 008efh
+     dd 00d66h
+     dd 011dch
+     dd 01650h
+     dd 01ac2h
+     dd 01f33h
+     dd 023a1h
+     dd 0280ch
+     dd 02c74h
+     dd 030d9h
+     dd 0353ah
+     dd 03996h
+     dd 03defh
+     dd 04242h
+     dd 04690h
+     dd 04ad9h
+     dd 04f1ch
+     dd 05358h
+     dd 0578fh
+     dd 05bbeh
+     dd 05fe6h
+     dd 06407h
+     dd 06820h
+     dd 06c31h
+     dd 07039h
+     dd 07439h
+     dd 0782fh
+     dd 07c1ch
+     dd 08000h
+     dd 083dah
+     dd 087a9h
+     dd 08b6dh
+     dd 08f27h
+     dd 092d6h
+     dd 09679h
+     dd 09a11h
+     dd 09d9ch
+     dd 0a11bh
+     dd 0a48eh
+     dd 0a7f3h
+     dd 0ab4ch
+     dd 0ae97h
+     dd 0b1d5h
+     dd 0b505h
+     dd 0b827h
+     dd 0bb3ah
+     dd 0be3fh
+     dd 0c135h
+     dd 0c41bh
+     dd 0c6f3h
+     dd 0c9bbh
+     dd 0cc73h
+     dd 0cf1ch
+     dd 0d1b4h
+     dd 0d43ch
+     dd 0d6b3h
+     dd 0d91ah
+     dd 0db6fh
+     dd 0ddb4h
+     dd 0dfe7h
+     dd 0e209h
+     dd 0e419h
+     dd 0e617h
+     dd 0e804h
+     dd 0e9deh
+     dd 0eba6h
+     dd 0ed5ch
+     dd 0eeffh
+     dd 0f090h
+     dd 0f20eh
+     dd 0f378h
+     dd 0f4d0h
+     dd 0f615h
+     dd 0f747h
+     dd 0f865h
+     dd 0f970h
+     dd 0fa68h
+     dd 0fb4ch
+     dd 0fc1ch
+     dd 0fcd9h
+     dd 0fd82h
+     dd 0fe18h
+     dd 0fe99h
+     dd 0ff07h
+     dd 0ff60h
+     dd 0ffa6h
+     dd 0ffd8h
+     dd 0fff6h
+     dd 010000h
+
+pi   dd 0003243Fh
+
+
+; fixed point multiplication
+; a and b must be 32 bit numbers. 
+; 16 bits whole part, 16 bits fraction
+; the result - whole part high 16 bits of eax, fraction low 16 bits.
+; ! ! ! ! ! ! ! ! 2.5 million multiplications / second ! ! ! ! ! ! ! ! !
+; (on my 75 Mhz Pentium)
+FPMul   MACRO a,b   
+    mov  eax,a
+    mov  edx,b
+    imul edx
+    shr  eax,16
+    shl  edx,16
+    add  eax,edx
+    ENDM
+
+; Fixed point division
+FPDiv   MACRO a,b
+local FDP1
+local FDP2
+local FDP3
+    sub  cx,cx
+    mov  eax,a
+    and  eax,eax
+    jns  FDP1
+    inc  cx
+    neg  eax
+FDP1:
+    sub  edx,edx
+    rol  eax,16
+    mov  dx,ax
+    mov  ebx,b
+    and  ebx,ebx
+    jns  FDP2
+    dec  cx
+    neg  ebx
+FDP2:
+    div  ebx
+    shr  ebx,1
+    adc  ebx,0
+    dec  ebx
+    cmp  ebx,edx
+    adc  eax,0
+    and  cx,cx
+    jz   FDP3
+    neg  eax
+FDP3: 
+    ENDM
+
+; returns cosine and sine of angle
+; cosine stored in eax, sine in edx
+; angle 0 < n < 360 degrees
+; angle = 16 bit value
+CosSin  MACRO angle
+    mov  si,angle
+    shl  si,2
+    mov  eax,Cosine[si]
+    neg  si
+    add  si,360*4
+    mov  edx,Cosine[si]
+    ENDM
+
+; Returns the square root of an integer rootme in eax
+SquareRoot MACRO rootme
+    mov ebx,rootme
+    xor esi,esi
+    xor edx,edx                  
+    mov ecx,ebx                  
+    mov eax,ebx                  
+
+iteration:
+    idiv ebx                     
+    xor edx,edx                  
+    add eax,ebx                  
+    shr eax,1                    
+    sub esi,eax
+
+    cmp esi,1            
+    jbe done
+
+    mov esi,eax                  
+    mov ebx,eax                  
+    mov eax,ecx
+
+    jmp iteration                
+done:
+    ENDM
+
+

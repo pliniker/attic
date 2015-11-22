@@ -1,0 +1,15 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.rmi.*;
+
+<font color=#0000FF>public</font> <font color=#0000FF>interface</font> Client <font color=#0000FF>extends</font> Remote
+{
+	<font color=#9A1900>// Cartographers should caal this after they call imfinished
+</font>	<font color=#9A1900>// to get payment for the completed map
+</font>	<font color=#0000FF>public</font> <font color=#009900>int</font> submitFinalMap(Region region, <font color=#009900>int</font> acct) 
+	                  <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException;
+}
+</tt>
+</pre>

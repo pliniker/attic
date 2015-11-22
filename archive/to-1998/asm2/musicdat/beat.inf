@@ -1,0 +1,14 @@
+
+i0 equ 0
+i1 equ 0
+i2 equ 0
+i3 equ 0
+i4 equ 3000 ; bsnare
+i5 equ 3000 ; bassd
+i6 equ 0
+i7 equ 0
+i8 equ 3000 ; tap
+i9 equ 6000 ; clash
+
+
+include music.dat

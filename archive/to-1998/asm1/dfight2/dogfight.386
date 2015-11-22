@@ -1,0 +1,707 @@
+
+jstkadj = 5
+
+.386
+
+GBuf2 SEGMENT PARA 'GBuf2' USE16
+keytable db 256 dup(0)
+GBuf2 ENDS
+
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+MaxHits equ 10
+
+; Do an explosion
+PutPixel MACRO x,y,c
+LOCAL Xit
+    pusha
+    mov  ax,320
+    mul  y
+    add  ax,x
+    mov  si,ax
+    mov  al,c
+    cmp  c,0
+    je   Xit
+    mov  es:[si],al
+    Xit:
+    popa
+    ENDM
+
+Exp_X dw 0
+Exp_Y dw 0
+Exp_Index dw 0
+Draw_Explosion PROC NEAR
+    sub  Exp_X,8
+    sub  Exp_Y,8
+
+    mov  Exp_Index,0
+    mov  di,0
+    YLoop:
+        mov  si,0
+        XLoop:
+            mov  bx,Exp_Index
+            mov  bh,Explosion[bx]
+            inc  Exp_Index
+
+            mov  cx,Exp_X
+            add  cx,si
+            mov  dx,Exp_Y
+            add  dx,di
+            PutPixel cx,dx,bh
+
+            inc  si
+            cmp  si,16
+            jne  XLoop
+        inc  di
+        cmp  di,16
+        jne  YLoop
+
+        call ViewBufferMOV
+    ret
+Draw_Explosion ENDP
+
+
+INCLUDE sprites.386
+
+x equ 0
+y equ 2
+
+LastPos dw 0
+DrawPixel MACRO x,y,c
+    pusha
+    mov  ax,320
+    mul  y
+    add  ax,x
+    mov  si,ax
+    mov  LastPos,si
+    mov  al,c
+    xor  es:[si],al
+    popa
+    ENDM
+
+ReadPixel MACRO c
+    pusha
+    mov  si,LastPos
+    mov  al,es:[si]
+    mov  c,al
+    popa
+    ENDM
+
+; vars & routines for the first plane
+
+PlaneA_X dw 100
+PlaneA_Y dw 90
+PlaneA_Angle dw -45
+PlaneA_Colour db 0
+PlaneA_Gcol db 0
+PlaneA_CIndex dw 0
+PlaneA_SCoords dw 0,0
+PlaneA_VCoords dw 0,0
+PlaneA_cos dd 0
+PlaneA_sin dd 0
+
+PlaneA_Draw PROC NEAR
+    mov  LastPos,0
+    CosSin PlaneA_Angle,PlaneA_cos,PlaneA_sin
+
+    mov  PlaneA_CIndex,0
+    mov  PlaneA_SCoords[y],0
+    AYloop:
+        mov  PlaneA_SCoords[x],0
+        AXloop:
+            ; get colour
+            mov  bx,PlaneA_CIndex
+            mov  al,PlaneA_Image[bx]
+            mov  PlaneA_Colour,al
+            inc  PlaneA_CIndex
+
+            ; rotate for x coord
+            mov  cx,PlaneA_SCoords[x]
+            sal  ecx,16
+            FPMul ecx,PlaneA_cos
+            mov  bx,PlaneA_SCoords[y]
+            sal  ebx,16
+            FPMul ebx,PlaneA_sin
+            sub  ecx,ebx
+            sar  ecx,16
+            mov  PlaneA_VCoords[x],cx
+            mov  dx,PlaneA_X
+            add  PlaneA_VCoords[x],dx
+
+            ; rotate for y coord
+            mov  cx,PlaneA_SCoords[x]
+            sal  ecx,16
+            FPMul ecx,PlaneA_sin
+            mov  ecx,eax
+            mov  bx,PlaneA_SCoords[y]
+            sal  ebx,16
+            FPMul ebx,PlaneA_cos
+            add  ecx,eax
+            sar  ecx,16
+            mov  PlaneA_VCoords[y],cx
+            mov  dx,PlaneA_Y
+            add  PlaneA_VCoords[y],dx
+
+            ReadPixel PlaneA_Gcol
+            cmp  PlaneA_Gcol,3
+            je   AKilled
+            DrawPixel PlaneA_VCoords[x],PlaneA_VCoords[y],PlaneA_Colour
+            
+            inc  PlaneA_SCoords[x]
+            cmp  PlaneA_SCoords[x],16
+            jne  AXLoop
+        inc  PlaneA_SCoords[y]
+        cmp  PlaneA_SCoords[y],8
+        jne  AYLoop
+        mov  ax,1
+    ret
+AKilled:
+    mov  ax,PlaneA_VCoords[x]
+    mov  Exp_X,ax
+    mov  ax,PlaneA_VCoords[y]
+    mov  Exp_Y,ax
+    call Draw_Explosion
+    mov  ax,0
+    ret
+PlaneA_Draw ENDP
+
+
+; seperate values & routines for the second plane
+
+PlaneB_X dw 190
+PlaneB_Y dw 90
+PlaneB_Angle dw 45
+PlaneB_Colour db 0
+PlaneB_Gcol db 0
+PlaneB_CIndex dw 0
+PlaneB_SCoords dw 0,0
+PlaneB_VCoords dw 0,0
+PlaneB_cos dd 0
+PlaneB_sin dd 0
+
+PlaneB_Draw PROC NEAR
+    mov  LastPos,0
+    CosSin PlaneB_Angle,PlaneB_cos,PlaneB_sin
+
+    mov  PlaneB_CIndex,0
+    mov  PlaneB_SCoords[y],0
+    BYloop:
+        mov  PlaneB_SCoords[x],0
+        BXloop:
+            ; get colour
+            mov  bx,PlaneB_CIndex
+            mov  al,PlaneB_Image[bx]
+            mov  PlaneB_Colour,al
+            inc  PlaneB_CIndex
+                       
+            ; rotate for x coord
+            mov  cx,PlaneB_SCoords[x]
+            sal  ecx,16
+            FPMul ecx,PlaneB_cos
+            mov  bx,PlaneB_SCoords[y]
+            sal  ebx,16
+            FPMul ebx,PlaneB_sin
+            sub  ecx,ebx
+            sar  ecx,16
+            mov  PlaneB_VCoords[x],cx
+            mov  dx,PlaneB_X
+            add  PlaneB_VCoords[x],dx
+
+            ; rotate for y coord
+            mov  cx,PlaneB_SCoords[x]
+            sal  ecx,16
+            FPMul ecx,PlaneB_sin
+            mov  ecx,eax
+            mov  bx,PlaneB_SCoords[y]
+            sal  ebx,16
+            FPMul ebx,PlaneB_cos
+            add  ecx,eax
+            sar  ecx,16
+            mov  PlaneB_VCoords[y],cx
+            mov  dx,PlaneB_Y
+            add  PlaneB_VCoords[y],dx
+
+            ReadPixel PlaneB_Gcol
+            cmp  PlaneB_Gcol,3
+            je   BKilled
+            DrawPixel PlaneB_VCoords[x],PlaneB_VCoords[y],PlaneB_Colour
+
+            inc  PlaneB_SCoords[x]
+            cmp  PlaneB_SCoords[x],16
+            jne  BXLoop
+        inc  PlaneB_SCoords[y]
+        cmp  PlaneB_SCoords[y],8
+        jne  BYLoop
+        mov  ax,1
+    ret
+BKilled:
+    mov  ax,PlaneB_VCoords[x]
+    mov  Exp_X,ax
+    mov  ax,PlaneB_VCoords[y]
+    mov  Exp_Y,ax
+    call Draw_Explosion
+    mov  ax,0
+    ret
+PlaneB_Draw ENDP
+
+
+HitsA db 0
+HitsB db 0
+
+CColour db 0
+YCtr dw 0
+XCtr dw 0
+ShowHits PROC NEAR
+    mov  YCtr,190
+
+    mov  CColour,3Fh
+    xor  cx,cx
+    mov  cl,HitsA
+    add  cl,1
+ALoop:
+    mov  XCtr,10
+    add  XCtr,cx
+    PutPixel XCtr,YCtr,CColour
+    dec  cl
+    jnz  ALoop
+
+    mov  CColour,7Fh
+    xor  cx,cx
+    mov  cl,HitsB
+    add  cl,1
+BLoop:
+    mov  XCtr,170
+    add  XCtr,cx
+    PutPixel XCtr,YCtr,CColour
+    dec  cl
+    jnz  BLoop
+    ret
+ShowHits ENDP
+
+Died PROC NEAR
+    cmp  HitsA,MaxHits
+    jge  ADead
+    cmp  HitsB,MaxHits
+    jge  BDead
+    jmp  NobodysDeadYet
+ADead:
+    mov  ax,PlaneA_X
+    mov  Exp_X,ax
+    mov  ax,PlaneA_Y
+    mov  Exp_Y,ax
+    call Draw_Explosion
+    mov  ax,0
+    ret
+BDead:
+    mov  ax,PlaneB_X
+    mov  Exp_X,ax
+    mov  ax,PlaneB_Y
+    mov  Exp_Y,ax
+    call Draw_Explosion
+    mov  ax,0
+    ret
+NobodysDeadYet:
+    mov  ax,1
+    ret
+Died ENDP
+
+Colour db 0
+BulletHit PROC NEAR
+    mov  Colour,dl
+
+    cmp  Colour,40h
+    jl   AHit
+    inc  HitsB
+    jmp  ExitHit
+AHit:
+    inc  HitsA
+ExitHit:
+    ret
+BulletHit ENDP
+
+
+; draw bullet
+BulletPixel MACRO x,y,c
+LOCAL Hit,NotHit
+    pusha
+    mov  ax,320
+    mul  y
+    add  ax,x
+    mov  si,ax
+    mov  al,c
+    xor  es:[si],al
+    mov  dl,es:[si]
+    cmp  dl,5
+    jge  Hit
+    jmp  NotHit
+Hit: call BulletHit
+NotHit:
+    popa
+    ENDM
+
+; bullet vars
+BBullet_DX dw 20 dup(0)
+BBullet_DY dw 20 dup(0)
+BBullet_VX dw 20 dup(0)
+BBullet_VY dw 20 dup(0)
+BBullet_Ctr dw 20 dup(0)
+BBullet_Index dw 0
+BDraw_Index dw 0
+
+Draw_BBullets PROC NEAR
+    mov BDraw_Index,0
+    BDrawLoop:
+        mov  bx,BDraw_Index
+        shl  bx,1
+        cmp  BBullet_Ctr[bx],0
+        je   BSkipBullet
+
+            BulletPixel BBullet_VX[bx],BBullet_VY[bx],80h
+
+        BSkipBullet:
+        inc  BDraw_Index
+        cmp  BDraw_Index,19
+        jne  BDrawLoop
+    ret
+Draw_BBullets ENDP
+
+; calc bullet trajectory
+Calc_BBullets PROC NEAR
+    mov  BDraw_Index,0
+    BCalcLoop:
+        mov  bx,BDraw_Index
+        shl  bx,1
+        cmp  BBullet_Ctr[bx],0
+        je   BSkipCalc
+          
+            dec  BBullet_Ctr[bx]
+            mov  ax,BBullet_DX[bx]
+            add  BBullet_VX[bx],ax
+            mov  ax,BBullet_DY[bx]
+            add  BBullet_VY[bx],ax
+
+            cmp  BBullet_VX[bx],5
+            jle  BbulposX
+            cmp  BBullet_VX[bx],315
+            jge  BbulposX
+            jmp  BbulposNX
+            BbulposX:    
+            mov  BBullet_Ctr[bx],0
+            BbulposNX:
+            cmp  BBullet_VY[bx],8
+            jle  BbulposY
+            cmp  BBullet_VY[bx],180
+            jge  BbulposY
+            jmp  BbulposNY
+            BbulposY:    
+            mov  BBullet_Ctr[bx],0
+            BbulposNY:
+
+        BSkipCalc:
+        inc  BDraw_Index
+        cmp  BDraw_Index,19
+        jne  BCalcLoop
+    ret
+Calc_BBullets ENDP
+
+; add bullet to list
+BBullet PROC NEAR
+    mov  bx,BBullet_Index
+    shl  bx,1
+
+    mov  BBullet_Ctr[bx],32
+    
+    mov  ax,PlaneB_X
+    mov  BBullet_VX[bx],ax
+    mov  ax,PlaneB_Y
+    mov  BBullet_VY[bx],ax
+
+    mov  eax,-080000h
+    FPMul eax,PlaneB_cos
+    shrd eax,edx,16
+    mov  BBullet_DX[bx],ax
+    mov  eax,-080000h
+    FPMul eax,PlaneB_sin
+    shrd eax,edx,16
+    mov  BBullet_DY[bx],ax
+
+    inc  BBullet_Index
+    cmp  BBullet_Index,19
+    je   BReset_Index
+    ret
+BReset_Index:
+    mov  BBullet_Index,0
+    ret
+BBullet ENDP
+
+
+; keyboard control for B
+PlaneB_kbd PROC NEAR
+    cmp  PlaneB_Angle,180
+    jge  gB
+    cmp  PlaneB_Angle,-180
+    jle  lB
+    jmp  nextB
+gB: mov  PlaneB_Angle,-180
+    jmp  nextB
+lB: mov  PlaneB_Angle,180
+nextB:
+
+    ; position control
+    cmp  PlaneB_X,319
+    jge  BXl
+    cmp  PlaneB_X,0
+    jle  BXg
+    jmp  BXN
+BXl:
+    mov  PlaneB_X,1
+    jmp  BXN
+BXg:
+    mov  PlaneB_X,318
+BXN:
+    cmp  PlaneB_Y,8
+    jle  Bposl
+    jmp  BposN
+Bposl:
+    mov  PlaneB_Y,8
+BposN:
+
+    ; nothing then Bexitkbd
+    cmp  keytable[32],1 ; d = clockwise
+    jnz  BincA ; inc angle
+    cmp  keytable[30],1 ; a = anticlockwise
+    jnz  BdecA ; dec angle
+    jmp  Bexitkbd
+BincA:
+    add  PlaneB_Angle,10
+    jmp  Bexitkbd
+BdecA:
+    sub  PlaneB_Angle,10
+Bexitkbd:
+    cmp  keytable[16],1 ; q = fire
+    jnz  BShoot ; shoot 
+    ret
+BShoot:
+    call BBullet
+    ret
+PlaneB_kbd ENDP
+
+; bullet vars
+ABullet_DX dw 100 dup(0)
+ABullet_DY dw 100 dup(0)
+ABullet_VX dw 100 dup(0)
+ABullet_VY dw 100 dup(0)
+ABullet_Ctr dw 100 dup(0)
+ABullet_Index dw 0
+ADraw_Index dw 0
+
+Draw_ABullets PROC NEAR
+    mov ADraw_Index,0
+    ADrawLoop:
+        mov  bx,ADraw_Index
+        shl  bx,1
+        cmp  ABullet_Ctr[bx],0
+        je   ASkipBullet
+
+            BulletPixel ABullet_VX[bx],ABullet_VY[bx],80h
+
+        ASkipBullet:
+        inc  ADraw_Index
+        cmp  ADraw_Index,99
+        jne  ADrawLoop
+    ret
+Draw_ABullets ENDP
+
+; calc bullet trajectory
+Calc_ABullets PROC NEAR
+    mov  ADraw_Index,0
+    ACalcLoop:
+        mov  bx,ADraw_Index
+        shl  bx,1
+        cmp  ABullet_Ctr[bx],0
+        je   ASkipCalc
+          
+            dec  ABullet_Ctr[bx]
+            mov  ax,ABullet_DX[bx]
+            add  ABullet_VX[bx],ax
+            mov  ax,ABullet_DY[bx]
+            add  ABullet_VY[bx],ax
+
+            cmp  ABullet_VX[bx],5
+            jle  AbulposX
+            cmp  ABullet_VX[bx],315
+            jge  AbulposX
+            jmp  AbulposNX
+            AbulposX:
+            mov  ABullet_Ctr[bx],0
+            AbulposNX:
+            cmp  ABullet_VY[bx],8
+            jle  AbulposY
+            cmp  ABullet_VY[bx],180
+            jge  AbulposY
+            jmp  AbulposNY
+            AbulposY:    
+            mov  ABullet_Ctr[bx],0
+            AbulposNY:
+
+        ASkipCalc:
+        inc  ADraw_Index
+        cmp  ADraw_Index,99
+        jne  ACalcLoop
+    ret
+Calc_ABullets ENDP
+
+; add bullet to list
+ABullet PROC NEAR
+    mov  bx,ABullet_Index
+    shl  bx,1
+
+    mov  ABullet_Ctr[bx],32
+    
+    mov  ax,PlaneA_X
+    mov  ABullet_VX[bx],ax
+    mov  ax,PlaneA_Y
+    mov  ABullet_VY[bx],ax
+
+    mov  eax,-080000h
+    FPMul eax,PlaneA_cos
+    shrd eax,edx,16
+    mov  ABullet_DX[bx],ax
+    mov  eax,-080000h
+    FPMul eax,PlaneA_sin
+    shrd eax,edx,16
+    mov  ABullet_DY[bx],ax
+
+    inc  ABullet_Index
+    cmp  ABullet_Index,99
+    je   AReset_Index
+    ret
+AReset_Index:
+    mov  ABullet_Index,0
+    ret
+ABullet ENDP
+            
+; joystick control for A
+PlaneA_jstk PROC NEAR
+
+    ; angle control
+    cmp  PlaneA_Angle,180
+    jge  gA
+    cmp  PlaneA_Angle,-180
+    jle  lA
+    jmp  nextA
+gA: mov  PlaneA_Angle,-180
+    jmp  nextA
+lA: mov  PlaneA_Angle,180
+nextA:
+
+    ; position control
+    cmp  PlaneA_X,319
+    jge  AXl
+    cmp  PlaneA_X,1
+    jle  AXg
+    jmp  AXN
+AXl:
+    mov  PlaneA_X,0
+    jmp  AXN
+AXg:
+    mov  PlaneA_X,318
+AXN:
+    cmp  PlaneA_Y,8
+    jle  Aposl
+    jmp  AposN
+Aposl:
+    mov  PlaneA_Y,8
+AposN:
+
+    ; nothing then Aexitkbd
+    cmp  keytable[38],1 ; d = clockwise
+    jnz  AincA ; inc angle
+    cmp  keytable[36],1 ; a = anticlockwise
+    jnz  AdecA ; dec angle
+    jmp  Aexitkbd
+AincA:
+    add  PlaneA_Angle,10
+    jmp  Aexitkbd
+AdecA:
+    sub  PlaneA_Angle,10
+Aexitkbd:
+    cmp  keytable[22],1 ; q = fire
+    jnz  AShoot ; shoot 
+    ret
+AShoot:
+    call ABullet
+    ret
+PlaneA_jstk ENDP
+
+
+; keyboard interrupt handler
+
+Keyboard_handler PROC FAR
+    pusha
+    push ds
+    SetDS Gbuf2
+
+    mov  ax,0A000h
+    mov  es,ax
+
+    in   al,60h
+    mov  bl,al
+    and  al,1000000b
+    jz   keydown
+    xor  bh,bh
+    mov  keytable[bx],0
+    jmp  endhandler
+keydown:
+    xor  bx,bx
+    mov  bl,al
+    mov  keytable[bx],1
+endhandler:
+
+    mov  si,bx
+    mov  es:[si],2
+
+    mov  al,20h
+    out  20h,al
+    pop  ds
+    popa
+    iret
+Keyboard_handler ENDP
+
+OldKeyboardSeg dw 0
+OldKeyboardOfs dw 0
+
+SetKeyboardHandler PROC NEAR
+    SetDS Code
+    cli
+    mov  ax,3509h
+    int  21h                                ; dos function getintvec
+    mov  OldKeyboardSeg,es
+    mov  OldKeyboardOfs,bx
+
+    mov  dx,seg Keyboard_handler
+    mov  ds,dx
+    mov  dx,offset Keyboard_handler
+    mov  ax,2509h
+    int  21h                                ; dos func setintvec to rerout
+    sti
+    ret
+SetKeyboardHandler ENDP
+
+OldKeyboardHandler PROC NEAR
+    SetDS Code
+    cli
+    mov  dx,OldKeyboardSeg                   
+    mov  ds,dx
+    mov  dx,OldKeyboardOfs
+    mov  ax,2509h
+    int  21h
+    sti
+    ret
+OldKeyboardHandler ENDP
+
+Code ENDS
+
+

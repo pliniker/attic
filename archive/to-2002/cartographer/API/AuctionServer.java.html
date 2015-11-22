@@ -1,0 +1,121 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#9A1900>/**
+* Interface for the AuctionServer used by cartographers and robots to buy/sell map sections
+*
+* @author Gus Paul
+* @version 2.5
+* @date 13/6/2001
+*/</font>
+
+<font color=#0000FF>import</font> java.rmi.*;
+<font color=#0000FF>import</font> java.util.*;
+
+<font color=#9A1900>// IMPORTANT:  Note that throughout all dealings with the server any ID number that corresponds to you
+</font><font color=#9A1900>// is your bank account number, obtained when you open an account with the bank.  When you register
+</font><font color=#9A1900>// both your account number will be recorded  Any attempts to masquerade as another user
+</font><font color=#9A1900>// by using an incorrect account number will be refused!!
+</font>
+<font color=#0000FF>public</font> <font color=#0000FF>interface</font> AuctionServer <font color=#0000FF>extends</font> Remote{
+    
+    <font color=#9A1900>//Flags for reason parameter in auctionResult
+</font>    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font> NO_CONNECTIONS = <font color=#CC33CC>0</font>;
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font> NO_BIDS = <font color=#CC33CC>1</font>;
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font> BELOW_RESERVE = <font color=#CC33CC>2</font>;
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#0000FF>final</font> <font color=#009900>int</font> YOU_SOLD_LOT = <font color=#CC33CC>3</font>;
+    
+    <font color=#9A1900>/**
+     * Cartographer registers with application server to allow callbacks
+     *
+     * @param o The cartogrpaher object that allows callbacks
+     * @param accoutNo Your bank account number as obtained from the bank server
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> register(Object o, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, AlreadyRegisteredException, InvalidAccountNoException;
+
+    <font color=#9A1900>/**
+     * Called by cartographer to unregister to prevent server hanging when talking to
+     * to no existent cartographer
+     *
+     * @param o The cartorapher object used that was oringally registered
+     */</font>
+    <font color=#9A1900>//public void unregister(Object o) throws RemoteException;
+</font> 
+    <font color=#9A1900>/** 
+     * Submit a Region for bidding on.  Called by Robot or Cartographer. 
+     * The lot object must be filled in approriately with sellerID, dimensions of the 
+     * region, accuracy and reserve price.
+     *
+     *@param r The region that is being submitted for sale.  The region ID should be set to zero if
+     * it is a robot group(ie new map region) or left unmodified if cartographer(ie previously purchased)
+     *@param reserve The reserve price for the region.  The server will not sell for less than this
+     *@param sellerID The submitting party's account no
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> submitRegion (Region r, <font color=#009900>int</font> reserve, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException;
+
+    <font color=#9A1900>//The server then calls the getBid method on the client object.  Once it has recieved all bids, it 
+</font>    <font color=#9A1900>//decides the winner and then calls the submitRegion method on the client.  Unsuccessful clients
+</font>    <font color=#9A1900>//will have unsuccessful method called.
+</font>
+    <font color=#9A1900>/**
+     * Called by cartographer.  Returns the most recently completed lot. Will throw exception if there is
+     * no lot (i.e. no auctions have happened yet)
+     */</font>
+    <font color=#0000FF>public</font> Lot getLot() <font color=#0000FF>throws</font> RemoteException, InvalidLotNoException;
+
+    <font color=#9A1900>/**
+     * Called by cartogrpaher.  Returns the lot with specifed lot number.
+     */</font>
+    <font color=#0000FF>public</font> Lot getLot(<font color=#009900>int</font> n) <font color=#0000FF>throws</font> RemoteException, InvalidLotNoException; 
+
+    <font color=#9A1900>/**
+     * Called by cartographer.  Returns a vector of all completed lots. You need to check the size.
+     * You must cast any object extracted to Lot.
+     */</font>
+    <font color=#0000FF>public</font> Vector getAllLots() <font color=#0000FF>throws</font> RemoteException;
+
+    <font color=#9A1900>/**
+     * Submit a request for a contract, which is a region with a blank mapdata. 
+     * Cartographer will be sent vector of 0 to 3 quotes 
+     * from robots, which they can decide to accept or not
+     * 
+     *@param r Region with only the appropriate quotes. 
+     *@param accountNo The submitting Cartographer's account number
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> submitJob (Region r, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException;
+
+    <font color=#9A1900>/**
+     * Called by cartographer with bank accountNo, accepting Quote.  Robot group is informed by callback that
+     * the quote is confirmed as a contract. Clock starts ticking.  Throws Remote Exception if Robot has died
+     *
+     *@param quote The quote you are confirming.
+     *@param accountNo The Cartograpehr account number.
+     */</font> 
+    <font color=#0000FF>public</font> <font color=#009900>void</font> acceptQuote (Quote quote, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException;
+
+    <font color=#9A1900>/**
+     * Called by robot to deliver the region for which they were given a contract to create.  At this point
+     * bank balances are altered appropriately, the region is deliverd to the cartographer.
+     *If you submit a region that was confirmed (i.e. you submit a region that there is no current contract
+     *waiting for, contractException is thrown
+     *
+     *@param r the completed region delivered by the robot.
+     *@param accountNo the robot group's account number.
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> deliverContract(Region r, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, ContractException, InvalidAccountNoException;
+
+    <font color=#9A1900>/**
+     * Called when you have finished the map.  Unregisteres you from the server, and prints your 
+     * account statement out to the scree
+     *
+     *@param accountNo your bank account no
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> imFinished(<font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException;
+
+
+}
+
+
+</tt>
+</pre>

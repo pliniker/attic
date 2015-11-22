@@ -1,0 +1,23 @@
+
+Multilayer FeedForward Neural Networks And Backpropagation
+==========================================================
+
+( Also known as multilayer perceptron because it is very similar to
+  perceptron networks of more than one layer )
+
+The limitation of the Perceptron was that it could not calculate weights
+for complex training sets because of its linear architecture.
+
+The advantage of the MLFF model is that because it does not use linear
+activation functions and has more than one or two layers internally
+it can calculate a set of weights for any set of inputs.
+A linear network with many layers is the same as a linear network of one
+layer.
+
+Inputs -> Hidden Neurons -> Outputs
+There is an input layer, one or more hidden layers and an output layer.
+The hidden neurons are separate from any external I/O hence "hidden".
+
+The learning algorithm is a form of supervised learning, the weights are
+adjusted according to the error gradient, so the activation function must
+be differentiable.

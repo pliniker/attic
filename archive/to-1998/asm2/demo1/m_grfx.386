@@ -1,0 +1,192 @@
+%out * * * Graphics include file - graphic effects * * *
+
+INCLUDE palette.dat
+
+%out SetPalette
+; change palette macro > segment of list, offset of list
+SetPalette PROC
+    mov  cx,256
+    mov  ah,0
+DACLoadLoop:
+    mov  dx,03C8h
+    mov  al,ah
+    cli
+    out  dx,al       ;set the DAC location #
+    mov  dx,03C9h
+    lodsb
+    out  dx,al       ;set the red component
+    lodsb
+    out  dx,al       ;set the green component
+    lodsb
+    out  dx,al       ;set the blue component
+    sti
+    inc  ah
+    loop DACLoadLoop
+    ret
+SetPalette ENDP
+
+%out GFX
+; -----------------------------------------------------
+EffectD PROC NEAR
+    mov  si,bx
+    neg  si
+    mov  cx,8000
+    SUBLOOPD:
+        mov  ax,cx
+        mul  ax
+        sub  ah,bl
+        shr  ah,1
+        add  ax,si
+        mov  gs:[si],ah
+        add  si,cx
+        add  si,cx
+    loop SUBLOOPD  
+    ret
+EffectD ENDP
+
+EffectE PROC NEAR
+    mov  si,bx
+    mov  cx,8000
+    SUBLOOPE:
+        mov  ax,cx
+        mul  ax
+        add  ah,bl
+        shr  ax,1
+        add  ax,si
+        mov  gs:[si],ah
+        add  si,cx
+        add  si,cx
+    loop SUBLOOPE 
+    ret
+EffectE ENDP
+; -----------------------------------------------------
+EffectF PROC NEAR
+    mov  si,bx
+    mov  cx,8000
+    SUBLOOPF:
+        mov  ax,cx
+        mul  ax
+        mov  gs:[si],ah
+        add  si,cx
+        add  si,cx
+    loop SUBLOOPF 
+    ret
+EffectF ENDP
+
+EffectG PROC NEAR
+    mov  si,bx
+    neg  si
+    mov  cx,8000
+    SUBLOOPG:
+        mov  ax,cx
+        mul  ax
+        mov  gs:[si],ah
+        add  si,cx
+        add  si,cx
+    loop SUBLOOPG 
+    ret
+EffectG ENDP
+; -----------------------------------------------------
+EffectH PROC NEAR
+    mov  si,bx
+    mov  cx,4000
+    SUBLOOPH:
+        mov  ax,si
+        mul  ax
+        add  ah,bl
+        shr  ah,1
+        mov  gs:[si],ah
+        add  si,16
+    loop SUBLOOPH 
+    ret
+EffectH ENDP
+
+EffectI PROC NEAR
+    mov  si,bx
+    mov  cx,4000
+    SUBLOOPI:
+        mov  ax,si
+        mul  ax
+        sub  ah,bl
+        shr  ah,1
+        mov  gs:[si],ah
+        add  si,16
+    loop SUBLOOPI 
+    ret
+EffectI ENDP
+; -----------------------------------------------------
+Flash PROC NEAR
+    mov  cx,0A000h
+    mov  es,cx
+    mov  di,0
+    mov  al,255
+    mov  cx,64000
+    cld
+    rep  stosb
+    ret
+Flash ENDP
+; -----------------------------------------------------
+EffectJ PROC NEAR
+    mov  si,bx
+    mov  cx,bx
+    SUBLOOPJ:
+
+mov  ax,cx
+mul  ax
+add  ah,bh
+add  ax,si
+add  ah,cl
+shr  ah,1
+
+        mov  gs:[si],ah
+        mov  si,bx
+        add  si,cx
+    loop SUBLOOPJ  
+    ret
+EffectJ ENDP
+; -----------------------------------------------------
+EffectK PROC NEAR
+    mov  si,bx
+    mov  cx,8000
+    SUBLOOPK:
+
+        mov  ax,cx
+        sub  ah,cl
+        sub  ah,bh
+        shr  ah,1
+
+        mov  gs:[si],ah
+        add  si,cx
+    loop SUBLOOPK  
+    ret
+EffectK ENDP
+; -----------------------------------------------------
+EffectL PROC NEAR
+    mov  si,0
+    mov  cx,bx
+    shr  cx,1
+    SUBLOOPL:
+
+mov  ax,cx
+sub  ah,cl
+sub  ah,bh
+shr  ah,1
+
+mov  dh,ah
+
+add  ah,bh
+add  ax,si
+add  ah,cl
+shr  ah,1
+
+xor  ah,dh 
+
+shr  ah,1
+
+        mov  gs:[si],ah
+        mov  si,bx
+        add  si,cx
+
+    loop SUBLOOPL
+    ret
+EffectL ENDP

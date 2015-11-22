@@ -1,0 +1,839 @@
+<?xml version="1.0"?>
+<Serializable>
+  <Map name="Root" id="0x8226b90" private="false" readonly="false">
+    <Map name="Edges" id="0x821f900" private="false" readonly="false">
+      <LearnSynapticLayer name="LearnSynapticLayer-81714636915" id="0x82818b8" private="false" readonly="false">
+        <CString name="displayName" id="0x81c74d0" private="false" readonly="false">
+          <value>LearnSynapticLayer-81714636915</value>
+        </CString>
+        <Boolean name="enabled" id="0x8244328" private="false" readonly="false">
+          <value>true</value>
+        </Boolean>
+        <CString name="group" id="0x8243fa8" private="false" readonly="false">
+          <value></value>
+        </CString>
+        <Map name="inputList" id="0x8281830" private="true" readonly="false">
+          <VirtualWorld_Fovea name="VirtualWorld_Fovea-81804289383" id="0x81d3208" private="false" readonly="false">
+            <VirtualWorld name="VirtualWorld" id="0x82201d0" private="false" readonly="false">
+              <Map name="VirtualWorld" id="0x8276640" private="false" readonly="false">
+                <Map name="fovea" id="0x81c9230" private="false" readonly="false">
+                  <Int name="foveaStep" id="0x81c9270" private="false" readonly="false">
+                    <value>1</value>
+                    <min>1</min>
+                    <max>1024</max>
+                    <step>1</step>
+                  </Int>
+                  <Image name="outputState" id="0x81ddd18" private="false" readonly="false">
+                    <encoding>2</encoding>
+                    <x>16</x>
+                    <y>18</y>
+                    <z>1</z>
+                    <binpos>0</binpos>
+                  </Image>
+                </Map>
+                <Map name="state" id="0x82050b0" private="false" readonly="false">
+                  <Image name="outputState" id="0x8204fe8" private="false" readonly="false">
+                    <encoding>2</encoding>
+                    <x>64</x>
+                    <y>54</y>
+                    <z>1</z>
+                    <binpos>288</binpos>
+                  </Image>
+                </Map>
+              </Map>
+              <Int3d name="fovea_orig" id="0x8205028" private="false" readonly="false">
+                <x>16</x>
+                <y>18</y>
+                <z>0</z>
+              </Int3d>
+              <ControlPoint name="fovea_point" id="0x824bc00" private="false" readonly="false">
+                <Boolean name="attachable" id="0x824bc98" private="false" readonly="false">
+                  <value>false</value>
+                </Boolean>
+                <Float3d name="pos" id="0x824bcc0" private="false" readonly="false">
+                  <x>-1.34222</x>
+                  <y>1.09965</y>
+                  <z>0</z>
+                </Float3d>
+              </ControlPoint>
+              <Float3d name="fovea_pos" id="0x824bc30" private="false" readonly="false">
+                <x>-1.34222</x>
+                <y>1.09965</y>
+                <z>0</z>
+              </Float3d>
+              <Int3d name="gridPos" id="0x822b558" private="false" readonly="false">
+                <x>9</x>
+                <y>6</y>
+                <z>0</z>
+              </Int3d>
+              <Int3d name="gridSize" id="0x822b588" private="false" readonly="false">
+                <x>48</x>
+                <y>36</y>
+                <z>0</z>
+              </Int3d>
+              <Int3d name="grid_orig" id="0x822b5b8" private="false" readonly="false">
+                <x>9</x>
+                <y>6</y>
+                <z>0</z>
+              </Int3d>
+              <Float name="scale_factor" id="0x822b5d8" private="false" readonly="false">
+                <value>5</value>
+                <min>0</min>
+                <max>1e+06</max>
+                <step>0.1</step>
+              </Float>
+              <Int3d name="state_orig" id="0x822b618" private="false" readonly="false">
+                <x>64</x>
+                <y>54</y>
+                <z>0</z>
+              </Int3d>
+              <ControlPoint name="state_point" id="0x822b648" private="false" readonly="false">
+                <Boolean name="attachable" id="0x824bce0" private="false" readonly="false">
+                  <value>false</value>
+                </Boolean>
+                <Float3d name="pos" id="0x822b6d8" private="false" readonly="false">
+                  <x>-8.12739</x>
+                  <y>8.94785</y>
+                  <z>0</z>
+                </Float3d>
+              </ControlPoint>
+              <Float3d name="state_pos" id="0x822b678" private="false" readonly="false">
+                <x>0</x>
+                <y>0</y>
+                <z>0</z>
+              </Float3d>
+              <Int3d name="tex_res" id="0x822b6f8" private="false" readonly="false">
+                <x>128</x>
+                <y>128</y>
+                <z>0</z>
+              </Int3d>
+            </VirtualWorld>
+            <CString name="displayName" id="0x824c490" private="false" readonly="false">
+              <value>VirtualWorld_Fovea-81804289383</value>
+            </CString>
+            <Boolean name="enabled" id="0x824c420" private="false" readonly="false">
+              <value>true</value>
+            </Boolean>
+            <CString name="group" id="0x81e65f0" private="false" readonly="false">
+              <value></value>
+            </CString>
+            <Map name="inputList" id="0x822f5c8" private="true" readonly="false"/>
+            <Image name="inputState" id="0x81e56d0" private="true" readonly="false">
+              <encoding>1</encoding>
+              <x>16</x>
+              <y>16</y>
+              <z>1</z>
+              <binpos>3744</binpos>
+            </Image>
+            <Int name="inputs" id="0x822f990" private="false" readonly="true">
+              <value>0</value>
+              <min>0</min>
+              <max>2147483647</max>
+              <step>1</step>
+            </Int>
+            <Map name="outputList" id="0x822b7b8" private="true" readonly="false">
+              <LearnSynapticLayer name="LearnSynapticLayer-81714636915" id="0x82818b8" private="false" readonly="false"/>
+              <StdSynapticLayer name="StdSynapticLayer-81957747793" id="0x81c8260" private="false" readonly="false">
+                <CString name="displayName" id="0x82765d0" private="false" readonly="false">
+                  <value>StdSynapticLayer-81957747793</value>
+                </CString>
+                <Boolean name="enabled" id="0x82619d0" private="false" readonly="false">
+                  <value>true</value>
+                </Boolean>
+                <CString name="group" id="0x82619e8" private="false" readonly="false">
+                  <value></value>
+                </CString>
+                <Map name="inputList" id="0x8261a10" private="true" readonly="false">
+                  <VirtualWorld_Fovea name="VirtualWorld_Fovea-81804289383" id="0x81d3208" private="false" readonly="false"/>
+                </Map>
+                <Image name="inputState" id="0x8261a40" private="true" readonly="false">
+                  <encoding>2</encoding>
+                  <x>16</x>
+                  <y>18</y>
+                  <z>144</z>
+                  <binpos>4000</binpos>
+                </Image>
+                <Int name="inputs" id="0x8261a70" private="false" readonly="false">
+                  <value>32</value>
+                  <min>1</min>
+                  <max>2147483647</max>
+                  <step>1</step>
+                </Int>
+                <Map name="learnMap" id="0x8261aa0" private="true" readonly="false">
+                  <Image name="outputState" id="0x8261ad0" private="false" readonly="false">
+                    <encoding>2</encoding>
+                    <x>16</x>
+                    <y>18</y>
+                    <z>1</z>
+                    <binpos>45472</binpos>
+                  </Image>
+                </Map>
+                <Map name="mapper_container" id="0x8261b00" private="false" readonly="false">
+                  <RandomFullyDistributed name="RandomFullyDistributed" id="0x8261b20" private="false" readonly="false">
+                    <IntArray name="connectionMap" id="0x8261b90" private="false" readonly="false">
+                      <size>9216</size>
+                      <binpos>45760</binpos>
+                    </IntArray>
+                  </RandomFullyDistributed>
+                </Map>
+                <ObjectList name="mapper_list" id="0x8261bb0" private="false" readonly="false">
+                  <choicesList>connection_maps</choicesList>
+                  <size>1</size>
+                  <max>1</max>
+                  <string0>RandomFullyDistributed</string0>
+                  <Map name="mapper_container" id="0x8261b00" private="false" readonly="false"/>
+                </ObjectList>
+                <Int name="offset" id="0x8262700" private="true" readonly="false">
+                  <value>0</value>
+                  <min>0</min>
+                  <max>2147483647</max>
+                  <step>1</step>
+                </Int>
+                <Map name="outputList" id="0x8262730" private="true" readonly="false">
+                  <StdNeuralLayer name="StdNeuralLayer-81681692777" id="0x8262770" private="false" readonly="false">
+                    <CString name="displayName" id="0x8262d60" private="false" readonly="false">
+                      <value>StdNeuralLayer-81681692777</value>
+                    </CString>
+                    <Boolean name="enabled" id="0x8262da8" private="false" readonly="false">
+                      <value>true</value>
+                    </Boolean>
+                    <CString name="group" id="0x8262dd0" private="false" readonly="false">
+                      <value></value>
+                    </CString>
+                    <Map name="inputList" id="0x8262d78" private="true" readonly="false">
+                      <LearnSynapticLayer name="LearnSynapticLayer-81714636915" id="0x82818b8" private="false" readonly="false"/>
+                      <StdSynapticLayer name="StdSynapticLayer-81957747793" id="0x81c8260" private="false" readonly="false"/>
+                      <StdSynapticLayer name="StdSynapticLayer-8424238335" id="0x8262e18" private="false" readonly="false">
+                        <CString name="displayName" id="0x8261bf0" private="false" readonly="false">
+                          <value>StdSynapticLayer-8424238335</value>
+                        </CString>
+                        <Boolean name="enabled" id="0x827ccc8" private="false" readonly="false">
+                          <value>true</value>
+                        </Boolean>
+                        <CString name="group" id="0x827ccf0" private="false" readonly="false">
+                          <value></value>
+                        </CString>
+                        <Map name="inputList" id="0x827cc98" private="true" readonly="false">
+                          <VirtualWorld_JReferent_Scale name="VirtualWorld_JReferent_Scale-8846930886" id="0x827cd48" private="false" readonly="false">
+                            <VirtualWorld name="VirtualWorld" id="0x82201d0" private="false" readonly="false"/>
+                            <CString name="displayName" id="0x827d118" private="false" readonly="false">
+                              <value>VirtualWorld_JReferent_Scale-8846930886</value>
+                            </CString>
+                            <Boolean name="enabled" id="0x827d1b0" private="false" readonly="false">
+                              <value>true</value>
+                            </Boolean>
+                            <CString name="group" id="0x827d1d8" private="false" readonly="false">
+                              <value></value>
+                            </CString>
+                            <Map name="inputList" id="0x827d200" private="true" readonly="false"/>
+                            <Image name="inputState" id="0x827d170" private="true" readonly="false">
+                              <encoding>1</encoding>
+                              <x>16</x>
+                              <y>16</y>
+                              <z>1</z>
+                              <binpos>82624</binpos>
+                            </Image>
+                            <Int name="inputs" id="0x827d240" private="false" readonly="true">
+                              <value>0</value>
+                              <min>0</min>
+                              <max>2147483647</max>
+                              <step>1</step>
+                            </Int>
+                            <Map name="outputList" id="0x827d270" private="true" readonly="false">
+                              <StdSynapticLayer name="StdSynapticLayer-8424238335" id="0x8262e18" private="false" readonly="false"/>
+                            </Map>
+                            <Image name="outputState" id="0x827d2c0" private="false" readonly="false">
+                              <encoding>1</encoding>
+                              <x>48</x>
+                              <y>2</y>
+                              <z>1</z>
+                              <binpos>82880</binpos>
+                            </Image>
+                            <Boolean name="ready" id="0x827d300" private="false" readonly="true">
+                              <value>true</value>
+                            </Boolean>
+                          </VirtualWorld_JReferent_Scale>
+                        </Map>
+                        <Image name="inputState" id="0x8261a40" private="true" readonly="false"/>
+                        <Int name="inputs" id="0x827d088" private="false" readonly="false">
+                          <value>96</value>
+                          <min>1</min>
+                          <max>2147483647</max>
+                          <step>1</step>
+                        </Int>
+                        <Map name="learnMap" id="0x827d058" private="true" readonly="false">
+                          <Image name="outputState" id="0x8261ad0" private="false" readonly="false"/>
+                        </Map>
+                        <Map name="mapper_container" id="0x827cdd8" private="false" readonly="false">
+                          <FullyConnected name="FullyConnected" id="0x827d290" private="false" readonly="false">
+                            <IntArray name="connectionMap" id="0x827de58" private="false" readonly="false">
+                              <size>27648</size>
+                              <binpos>82976</binpos>
+                            </IntArray>
+                          </FullyConnected>
+                        </Map>
+                        <ObjectList name="mapper_list" id="0x827cda8" private="false" readonly="false">
+                          <choicesList>connection_maps</choicesList>
+                          <size>1</size>
+                          <max>1</max>
+                          <string0>FullyConnected</string0>
+                          <Map name="mapper_container" id="0x827cdd8" private="false" readonly="false"/>
+                        </ObjectList>
+                        <Int name="offset" id="0x827d318" private="true" readonly="false">
+                          <value>0</value>
+                          <min>0</min>
+                          <max>2147483647</max>
+                          <step>1</step>
+                        </Int>
+                        <Map name="outputList" id="0x827d140" private="true" readonly="false">
+                          <StdNeuralLayer name="StdNeuralLayer-81681692777" id="0x8262770" private="false" readonly="false"/>
+                        </Map>
+                        <Image name="outputState" id="0x827d2c0" private="false" readonly="false"/>
+                        <Boolean name="ready" id="0x827d0d8" private="false" readonly="true">
+                          <value>true</value>
+                        </Boolean>
+                        <Map name="synapse_container" id="0x827d0b8" private="false" readonly="false">
+                          <StdSynapse name="StdSynapse" id="0x827deb0" private="false" readonly="false">
+                            <Int name="size" id="0x827df10" private="false" readonly="true">
+                              <value>3981312</value>
+                              <min>0</min>
+                              <max>2147483647</max>
+                              <step>1</step>
+                            </Int>
+                          </StdSynapse>
+                        </Map>
+                        <ObjectList name="synapse_list" id="0x827df30" private="false" readonly="false">
+                          <choicesList>synapse_arrays</choicesList>
+                          <size>1</size>
+                          <max>1</max>
+                          <string0>StdSynapse</string0>
+                          <Map name="synapse_container" id="0x827d0b8" private="false" readonly="false"/>
+                        </ObjectList>
+                      </StdSynapticLayer>
+                      <StdSynapticLayer name="StdSynapticLayer-8846930886" id="0x827cdf8" private="false" readonly="false">
+                        <CString name="displayName" id="0x827de78" private="false" readonly="false">
+                          <value>StdSynapticLayer-8846930886</value>
+                        </CString>
+                        <Boolean name="enabled" id="0x827cea0" private="false" readonly="false">
+                          <value>true</value>
+                        </Boolean>
+                        <CString name="group" id="0x827ceb8" private="false" readonly="false">
+                          <value></value>
+                        </CString>
+                        <Map name="inputList" id="0x827ced0" private="true" readonly="false">
+                          <StdNeuralLayer name="StdNeuralLayer-81681692777" id="0x8262770" private="false" readonly="false"/>
+                        </Map>
+                        <Image name="inputState" id="0x8261a40" private="true" readonly="false"/>
+                        <Int name="inputs" id="0x827cf10" private="false" readonly="false">
+                          <value>16</value>
+                          <min>1</min>
+                          <max>2147483647</max>
+                          <step>1</step>
+                        </Int>
+                        <Map name="learnMap" id="0x827cf40" private="true" readonly="false">
+                          <Image name="outputState" id="0x8261ad0" private="false" readonly="false"/>
+                        </Map>
+                        <Map name="mapper_container" id="0x827cf88" private="false" readonly="false">
+                          <RandomFullyDistributed name="RandomFullyDistributed" id="0x827cfa8" private="false" readonly="false">
+                            <IntArray name="connectionMap" id="0x827d008" private="false" readonly="false">
+                              <size>4608</size>
+                              <binpos>193568</binpos>
+                            </IntArray>
+                          </RandomFullyDistributed>
+                        </Map>
+                        <ObjectList name="mapper_list" id="0x827e068" private="false" readonly="false">
+                          <choicesList>connection_maps</choicesList>
+                          <size>1</size>
+                          <max>1</max>
+                          <string0>RandomFullyDistributed</string0>
+                          <Map name="mapper_container" id="0x827cf88" private="false" readonly="false"/>
+                        </ObjectList>
+                        <Int name="offset" id="0x827d028" private="true" readonly="false">
+                          <value>0</value>
+                          <min>0</min>
+                          <max>2147483647</max>
+                          <step>1</step>
+                        </Int>
+                        <Map name="outputList" id="0x827e0d8" private="true" readonly="false">
+                          <StdNeuralLayer name="StdNeuralLayer-81681692777" id="0x8262770" private="false" readonly="false"/>
+                        </Map>
+                        <Image name="outputState" id="0x8261ad0" private="false" readonly="false"/>
+                        <Boolean name="ready" id="0x827cf70" private="false" readonly="true">
+                          <value>true</value>
+                        </Boolean>
+                        <Map name="synapse_container" id="0x827e0f8" private="false" readonly="false">
+                          <InverseSynapse name="InverseSynapse" id="0x827e150" private="false" readonly="false">
+                            <Int name="size" id="0x827e1c0" private="false" readonly="true">
+                              <value>663552</value>
+                              <min>0</min>
+                              <max>2147483647</max>
+                              <step>1</step>
+                            </Int>
+                          </InverseSynapse>
+                        </Map>
+                        <ObjectList name="synapse_list" id="0x827cfc8" private="false" readonly="false">
+                          <choicesList>synapse_arrays</choicesList>
+                          <size>1</size>
+                          <max>1</max>
+                          <string0>InverseSynapse</string0>
+                          <Map name="synapse_container" id="0x827e0f8" private="false" readonly="false"/>
+                        </ObjectList>
+                      </StdSynapticLayer>
+                    </Map>
+                    <Image name="inputState" id="0x8261a40" private="true" readonly="false"/>
+                    <Int name="inputs" id="0x827c070" private="false" readonly="true">
+                      <value>144</value>
+                      <min>0</min>
+                      <max>2147483647</max>
+                      <step>1</step>
+                    </Int>
+                    <Map name="neuron_container" id="0x827bf90" private="false" readonly="false">
+                      <FVGRAM name="FVGRAM" id="0x827be78" private="false" readonly="false">
+                        <Int name="inputs" id="0x827c228" private="false" readonly="false">
+                          <value>144</value>
+                          <min>0</min>
+                          <max>2147483647</max>
+                          <step>1</step>
+                        </Int>
+                        <Int name="max_patterns" id="0x827cc08" private="false" readonly="false">
+                          <value>5</value>
+                          <min>1</min>
+                          <max>2147483647</max>
+                          <step>1</step>
+                        </Int>
+                        <UcharArray name="patterns" id="0x8262f80" private="false" readonly="false">
+                          <size>208800</size>
+                          <binpos>212000</binpos>
+                        </UcharArray>
+                        <Boolean name="random_output" id="0x827bff0" private="false" readonly="false">
+                          <value>true</value>
+                        </Boolean>
+                        <Int name="size" id="0x827cc28" private="false" readonly="true">
+                          <value>288</value>
+                          <min>0</min>
+                          <max>2147483647</max>
+                          <step>1</step>
+                        </Int>
+                        <UcharArray name="slots_avail" id="0x827e128" private="false" readonly="false">
+                          <size>5</size>
+                          <binpos>420800</binpos>
+                        </UcharArray>
+                      </FVGRAM>
+                    </Map>
+                    <ObjectList name="neuron_list" id="0x827be48" private="false" readonly="false">
+                      <choicesList>neuron_arrays</choicesList>
+                      <size>1</size>
+                      <max>1</max>
+                      <string0>FVGRAM</string0>
+                      <Map name="neuron_container" id="0x827bf90" private="false" readonly="false"/>
+                    </ObjectList>
+                    <Map name="outputList" id="0x8262d20" private="true" readonly="false">
+                      <StdSynapticLayer name="StdSynapticLayer-8846930886" id="0x827cdf8" private="false" readonly="false"/>
+                    </Map>
+                    <Image name="outputState" id="0x8261ad0" private="false" readonly="false"/>
+                    <Boolean name="ready" id="0x827c018" private="false" readonly="true">
+                      <value>true</value>
+                    </Boolean>
+                  </StdNeuralLayer>
+                </Map>
+                <Image name="outputState" id="0x81ddd18" private="false" readonly="false"/>
+                <Boolean name="ready" id="0x8262c48" private="false" readonly="true">
+                  <value>true</value>
+                </Boolean>
+                <Map name="synapse_container" id="0x8262b60" private="false" readonly="false">
+                  <StdSynapse name="StdSynapse" id="0x8262be8" private="false" readonly="false">
+                    <Int name="size" id="0x8262ca0" private="false" readonly="true">
+                      <value>1327104</value>
+                      <min>0</min>
+                      <max>2147483647</max>
+                      <step>1</step>
+                    </Int>
+                  </StdSynapse>
+                </Map>
+                <ObjectList name="synapse_list" id="0x827bfc0" private="false" readonly="false">
+                  <choicesList>synapse_arrays</choicesList>
+                  <size>1</size>
+                  <max>1</max>
+                  <string0>StdSynapse</string0>
+                  <Map name="synapse_container" id="0x8262b60" private="false" readonly="false"/>
+                </ObjectList>
+              </StdSynapticLayer>
+            </Map>
+            <Image name="outputState" id="0x81ddd18" private="false" readonly="false"/>
+            <Boolean name="ready" id="0x8205c20" private="false" readonly="true">
+              <value>true</value>
+            </Boolean>
+          </VirtualWorld_Fovea>
+        </Map>
+        <Image name="inputState" id="0x8261a40" private="true" readonly="false"/>
+        <Int name="inputs" id="0x824bd28" private="true" readonly="false">
+          <value>0</value>
+          <min>0</min>
+          <max>0</max>
+          <step>1</step>
+        </Int>
+        <Map name="learnMap" id="0x824bcf8" private="true" readonly="false">
+          <Image name="outputState" id="0x8261ad0" private="false" readonly="false"/>
+        </Map>
+        <Int name="offset" id="0x81d3250" private="true" readonly="false">
+          <value>0</value>
+          <min>0</min>
+          <max>2147483647</max>
+          <step>1</step>
+        </Int>
+        <Map name="outputList" id="0x8205b50" private="true" readonly="false">
+          <StdNeuralLayer name="StdNeuralLayer-81681692777" id="0x8262770" private="false" readonly="false"/>
+        </Map>
+        <Image name="outputState" id="0x81ddd18" private="false" readonly="false"/>
+        <Boolean name="ready" id="0x824bd80" private="false" readonly="true">
+          <value>true</value>
+        </Boolean>
+      </LearnSynapticLayer>
+      <StdSynapticLayer name="StdSynapticLayer-81957747793" id="0x81c8260" private="false" readonly="false"/>
+      <StdSynapticLayer name="StdSynapticLayer-8424238335" id="0x8262e18" private="false" readonly="false"/>
+      <StdSynapticLayer name="StdSynapticLayer-8846930886" id="0x827cdf8" private="false" readonly="false"/>
+    </Map>
+    <Map name="Navigator" id="0x82440a0" private="false" readonly="false">
+      <EdgeView name="LearnSynapticLayer-81714636915" id="0x8262b90" private="false" readonly="false">
+        <LearnSynapticLayer name="LearnSynapticLayer-81714636915" id="0x82818b8" private="false" readonly="false"/>
+        <ControlPoint name="end_point" id="0x8262c60" private="false" readonly="false">
+          <Boolean name="attachable" id="0x8236dc0" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x822f548" private="false" readonly="false">
+            <x>2.26417</x>
+            <y>3.06947</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <Float3d name="end_pos" id="0x822f578" private="false" readonly="false">
+          <x>2.26417</x>
+          <y>3.06947</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="object_point" id="0x822fd80" private="false" readonly="false">
+          <Boolean name="attachable" id="0x81e5cb8" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8205be0" private="false" readonly="false">
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <ControlPoint name="shape_point" id="0x815e4b0" private="false" readonly="false">
+          <Boolean name="attachable" id="0x824bd58" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8205c00" private="false" readonly="false">
+            <x>0.130625</x>
+            <y>5.41468</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <Float3d name="shape_pos" id="0x81c93b0" private="false" readonly="false">
+          <x>0.130625</x>
+          <y>5.41468</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="start_point" id="0x81b37d0" private="false" readonly="false">
+          <Boolean name="attachable" id="0x81c72b8" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8205b80" private="false" readonly="false">
+            <x>-2.9826</x>
+            <y>6.69076</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <Float3d name="start_pos" id="0x8205ae0" private="false" readonly="false">
+          <x>-2.9826</x>
+          <y>6.69076</y>
+          <z>0</z>
+        </Float3d>
+      </EdgeView>
+      <NodeView name="StdNeuralLayer-81681692777" id="0x8264b30" private="false" readonly="false">
+        <StdNeuralLayer name="StdNeuralLayer-81681692777" id="0x8262770" private="false" readonly="false"/>
+        <Int3d name="orig_res" id="0x8261b40" private="false" readonly="false">
+          <x>16</x>
+          <y>18</y>
+          <z>0</z>
+        </Int3d>
+        <Image name="outputState" id="0x8261ad0" private="false" readonly="false"/>
+        <Float name="scale_factor" id="0x8262cd0" private="false" readonly="false">
+          <value>1.33333</value>
+          <min>0</min>
+          <max>1e+06</max>
+          <step>0.1</step>
+        </Float>
+        <Int3d name="tex_res" id="0x8262750" private="false" readonly="false">
+          <x>32</x>
+          <y>64</y>
+          <z>0</z>
+        </Int3d>
+        <ControlPoint name="texture" id="0x8204898" private="false" readonly="false">
+          <Boolean name="attachable" id="0x81c84d8" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x822f548" private="false" readonly="false"/>
+        </ControlPoint>
+      </NodeView>
+      <EdgeView name="StdSynapticLayer-81957747793" id="0x827bed0" private="false" readonly="false">
+        <StdSynapticLayer name="StdSynapticLayer-81957747793" id="0x81c8260" private="false" readonly="false"/>
+        <ControlPoint name="end_point" id="0x81ddee8" private="false" readonly="false">
+          <Boolean name="attachable" id="0x81e6608" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x822f548" private="false" readonly="false"/>
+        </ControlPoint>
+        <Float3d name="end_pos" id="0x8205ba0" private="false" readonly="false">
+          <x>2.26417</x>
+          <y>3.06947</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="object_point" id="0x8276540" private="false" readonly="false">
+          <Boolean name="attachable" id="0x824bc50" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x827c258" private="false" readonly="false">
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <ControlPoint name="shape_point" id="0x8205b00" private="false" readonly="false">
+          <Boolean name="attachable" id="0x827bf38" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8262eb0" private="false" readonly="false">
+            <x>-1.54573</x>
+            <y>3.62129</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <Float3d name="shape_pos" id="0x827bf60" private="false" readonly="false">
+          <x>-1.54573</x>
+          <y>3.62129</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="start_point" id="0x8262ed0" private="false" readonly="false">
+          <Boolean name="attachable" id="0x8262f50" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8205b80" private="false" readonly="false"/>
+        </ControlPoint>
+        <Float3d name="start_pos" id="0x8262f00" private="false" readonly="false">
+          <x>-2.9826</x>
+          <y>6.69076</y>
+          <z>0</z>
+        </Float3d>
+      </EdgeView>
+      <EdgeView name="StdSynapticLayer-8424238335" id="0x824bae8" private="false" readonly="false">
+        <StdSynapticLayer name="StdSynapticLayer-8424238335" id="0x8262e18" private="false" readonly="false"/>
+        <ControlPoint name="end_point" id="0x824bb60" private="false" readonly="false">
+          <Boolean name="attachable" id="0x824bbc0" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x822f548" private="false" readonly="false"/>
+        </ControlPoint>
+        <Float3d name="end_pos" id="0x8262f20" private="false" readonly="false">
+          <x>2.26417</x>
+          <y>3.06947</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="object_point" id="0x8204eb0" private="false" readonly="false">
+          <Boolean name="attachable" id="0x824bbd8" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8204f40" private="false" readonly="false">
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <ControlPoint name="shape_point" id="0x8204f60" private="false" readonly="false">
+          <Boolean name="attachable" id="0x8204fa0" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x81d3120" private="false" readonly="false">
+            <x>-0.195937</x>
+            <y>1.34505</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <Float3d name="shape_pos" id="0x8204ee0" private="false" readonly="false">
+          <x>-0.195937</x>
+          <y>1.34505</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="start_point" id="0x81d3140" private="false" readonly="false">
+          <Boolean name="attachable" id="0x81d31c0" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x81d31e8" private="false" readonly="false">
+            <x>-2.80844</x>
+            <y>0.137954</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <Float3d name="start_pos" id="0x81d3170" private="false" readonly="false">
+          <x>-2.80844</x>
+          <y>0.137954</y>
+          <z>0</z>
+        </Float3d>
+      </EdgeView>
+      <EdgeView name="StdSynapticLayer-8846930886" id="0x824b9e0" private="false" readonly="false">
+        <StdSynapticLayer name="StdSynapticLayer-8846930886" id="0x827cdf8" private="false" readonly="false"/>
+        <ControlPoint name="end_point" id="0x824ba58" private="false" readonly="false">
+          <Boolean name="attachable" id="0x824c440" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x822f548" private="false" readonly="false"/>
+        </ControlPoint>
+        <Float3d name="end_pos" id="0x824ba28" private="false" readonly="false">
+          <x>2.26417</x>
+          <y>3.06947</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="object_point" id="0x82538b0" private="false" readonly="false">
+          <Boolean name="attachable" id="0x8253920" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8253948" private="false" readonly="false">
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <ControlPoint name="shape_point" id="0x8253968" private="false" readonly="false">
+          <Boolean name="attachable" id="0x8264930" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8264958" private="false" readonly="false">
+            <x>7.8101</x>
+            <y>2.83245</y>
+            <z>0</z>
+          </Float3d>
+        </ControlPoint>
+        <Float3d name="shape_pos" id="0x82538e0" private="false" readonly="false">
+          <x>7.8101</x>
+          <y>2.83245</y>
+          <z>0</z>
+        </Float3d>
+        <ControlPoint name="start_point" id="0x8264978" private="false" readonly="false">
+          <Boolean name="attachable" id="0x82649f8" private="false" readonly="false">
+            <value>true</value>
+          </Boolean>
+          <Float3d name="pos" id="0x822f548" private="false" readonly="false"/>
+        </ControlPoint>
+        <Float3d name="start_pos" id="0x82649a8" private="false" readonly="false">
+          <x>2.26417</x>
+          <y>3.06947</y>
+          <z>0</z>
+        </Float3d>
+      </EdgeView>
+      <NodeView name="VirtualWorld_Fovea-81804289383" id="0x827bd30" private="false" readonly="false">
+        <VirtualWorld_Fovea name="VirtualWorld_Fovea-81804289383" id="0x81d3208" private="false" readonly="false"/>
+        <Int3d name="orig_res" id="0x827bd88" private="false" readonly="false">
+          <x>16</x>
+          <y>18</y>
+          <z>0</z>
+        </Int3d>
+        <Image name="outputState" id="0x81ddd18" private="false" readonly="false"/>
+        <Float name="scale_factor" id="0x827bdb8" private="false" readonly="false">
+          <value>1.33333</value>
+          <min>0</min>
+          <max>1e+06</max>
+          <step>0.1</step>
+        </Float>
+        <Int3d name="tex_res" id="0x827bde8" private="false" readonly="false">
+          <x>32</x>
+          <y>64</y>
+          <z>0</z>
+        </Int3d>
+        <ControlPoint name="texture" id="0x827be18" private="false" readonly="false">
+          <Boolean name="attachable" id="0x8264a10" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x8205b80" private="false" readonly="false"/>
+        </ControlPoint>
+      </NodeView>
+      <NodeView name="VirtualWorld_JReferent_Scale-8846930886" id="0x822f4d0" private="false" readonly="false">
+        <VirtualWorld_JReferent_Scale name="VirtualWorld_JReferent_Scale-8846930886" id="0x827cd48" private="false" readonly="false"/>
+        <Int3d name="orig_res" id="0x824b9c0" private="false" readonly="false">
+          <x>48</x>
+          <y>2</y>
+          <z>0</z>
+        </Int3d>
+        <Image name="outputState" id="0x827d2c0" private="false" readonly="false"/>
+        <Float name="scale_factor" id="0x822f528" private="false" readonly="false">
+          <value>0.333333</value>
+          <min>0</min>
+          <max>1e+06</max>
+          <step>0.1</step>
+        </Float>
+        <Int3d name="tex_res" id="0x822f470" private="false" readonly="false">
+          <x>128</x>
+          <y>4</y>
+          <z>0</z>
+        </Int3d>
+        <ControlPoint name="texture" id="0x8262b30" private="false" readonly="false">
+          <Boolean name="attachable" id="0x827c0f0" private="false" readonly="false">
+            <value>false</value>
+          </Boolean>
+          <Float3d name="pos" id="0x81d31e8" private="false" readonly="false"/>
+        </ControlPoint>
+      </NodeView>
+    </Map>
+    <Map name="Nodes" id="0x8230828" private="false" readonly="false">
+      <ImageInputLayer name="ImageInputLayer-81804289383" id="0x81f6820" private="false" readonly="false">
+        <CString name="displayName" id="0x827e910" private="false" readonly="false">
+          <value>ImageInputLayer-81804289383</value>
+        </CString>
+        <Boolean name="enabled" id="0x827e928" private="false" readonly="false">
+          <value>true</value>
+        </Boolean>
+        <CString name="group" id="0x81f68a0" private="false" readonly="false">
+          <value></value>
+        </CString>
+        <Map name="inputList" id="0x81f6860" private="true" readonly="false"/>
+        <Image name="inputState" id="0x81f68d8" private="true" readonly="false">
+          <encoding>1</encoding>
+          <x>16</x>
+          <y>16</y>
+          <z>1</z>
+          <binpos>420805</binpos>
+        </Image>
+        <Int name="inputs" id="0x81f6918" private="false" readonly="true">
+          <value>0</value>
+          <min>0</min>
+          <max>2147483647</max>
+          <step>1</step>
+        </Int>
+        <Map name="outputList" id="0x8321af8" private="true" readonly="false"/>
+        <Image name="outputState" id="0x8321b38" private="false" readonly="false">
+          <encoding>2</encoding>
+          <x>64</x>
+          <y>54</y>
+          <z>1</z>
+          <binpos>421061</binpos>
+        </Image>
+        <Boolean name="ready" id="0x8321b68" private="false" readonly="true">
+          <value>true</value>
+        </Boolean>
+      </ImageInputLayer>
+      <StdNeuralLayer name="StdNeuralLayer-81681692777" id="0x8262770" private="false" readonly="false"/>
+      <VirtualWorld_Fovea name="VirtualWorld_Fovea-81804289383" id="0x81d3208" private="false" readonly="false"/>
+      <VirtualWorld_JReferent_Scale name="VirtualWorld_JReferent_Scale-8846930886" id="0x827cd48" private="false" readonly="false"/>
+    </Map>
+    <Map name="System" id="0x827c1e0" private="false" readonly="false">
+      <ObjectList name="Alternative_Execution_Engine" id="0x827c180" private="false" readonly="false">
+        <choicesList>exec_engines</choicesList>
+        <size>0</size>
+        <max>1</max>
+        <Map name="Exec_Engine" id="0x827c1b0" private="false" readonly="false"/>
+      </ObjectList>
+      <Map name="Exec_Engine" id="0x827c1b0" private="false" readonly="false"/>
+    </Map>
+  </Map>
+</Serializable>

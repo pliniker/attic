@@ -1,0 +1,151 @@
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+SetDs MACRO segname
+assume ds:segname
+    mov  ax,segname
+    mov  ds,ax
+    ENDM
+
+SetReg MACRO SegReg,segname
+assume SegReg:segname
+    mov  ax,segname
+    mov  SegReg,ax
+    ENDM
+
+; output a 16 bit value in hexadecimal format
+; input value in bx
+OutHex PROC NEAR
+    jmp  SKPMEM
+MemFree db '0','0','0','0','h','$'
+SKPMEM:                              
+    push ds
+    assume ds:Code
+    mov  ax,Code
+    mov  ds,ax
+    push bx
+    and  bx,1111000000000000b
+    shr  bx,12
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE91
+    jmp  SKIPA
+ABOVE91:
+    add  bl,7
+SKIPA:
+    mov  MemFree[0],bl
+    pop  bx
+    push bx
+    and  bx,0000111100000000b
+    shr  bx,8
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE92
+    jmp  SKIPB
+ABOVE92:
+    add  bl,7
+SKIPB:
+    mov  MemFree[1],bl
+    pop  bx
+    push bx
+    and  bx,0000000011110000b
+    shr  bx,4
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE93
+    jmp  SKIPC
+ABOVE93:
+    add  bl,7
+SKIPC:
+    mov  MemFree[2],bl
+    pop  bx
+    and  bx,0000000000001111b
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE94
+    jmp  SKIPD
+ABOVE94:
+    add  bl,7
+SKIPD:
+    mov  MemFree[3],bl
+    mov  ah,09h
+    mov  dx,offset MemFree
+    int  21h
+    pop  ds
+    ret
+OutHex ENDP
+
+IfError PROC
+    push ax
+    jmp  SKIPMSG1
+SBErr       DB  'Error with Sound Blaster',13,10,'$'
+VOCErr      DB  'Error with VOICE file',13,10,'$'
+DRVErr      DB  'Error with CT-VOICE.DRV',13,10,'$'
+BMPErr      DB  'Error with BMP',13,10,'$'
+MEMErr      DB  'Memory allocation error',13,10,'$'
+NoERR       DB  'Unknown error',13,10,'$'
+Error       DB  'Error #  h',13,10,'$'
+SKIPMSG1:
+    jc   IFERR
+    pop  ax
+    clc
+    ret
+IFERR:
+    clc
+    SetDs Code
+
+    pop  ax
+    mov  cl,4
+    mov  ch,al
+    shr  al,cl
+    add  al,48
+    mov  Error[7],al
+    mov  al,ch
+    shl  al,cl
+    shr  al,cl
+    add  al,48
+    mov  Error[8],al
+    mov  ah,09h
+    mov  dx,offset Error
+    int  21h
+
+    cmp  bx,01h
+    je   SNDERROR
+    cmp  bx,02h
+    je   VOCERROR
+    cmp  bx,03h
+    je   BMPERROR
+    cmp  bx,04h
+    je   DRVERROR
+    cmp  bx,05h
+    je   MEMERROR
+    jmp  UNKNOWNERR
+SNDERROR:
+    mov  dx,offset SBErr
+    jmp  ERRMSG
+VOCERROR:
+    mov  dx,offset VOCErr
+    jmp  ERRMSG
+BMPERROR:
+    mov  dx,offset BMPErr
+    jmp  ERRMSG
+DRVERROR:
+    mov  dx,offset DRVErr
+    jmp  ERRMSG
+MEMERROR:
+    mov  dx,offset MEMErr
+    jmp  ERRMSG
+UNKNOWNERR:
+    mov  dx,offset NOErr
+    jmp  ERRMSG
+
+ERRMSG:
+    mov  ah,09h
+    int  21h
+
+    mov  ah,4Ch
+    int  21h
+IfError ENDP
+
+Code ENDS

@@ -1,0 +1,14 @@
+
+i0 equ 4000     ; tom1
+i1 equ 4000     ; tom2
+i2 equ 2000     ; bass snare
+i3 equ 2000     ; snare drum
+i4 equ 6000     ; clash
+i5 equ 2000     ; synth snare
+i6 equ 0
+i7 equ 10000    ; synth bass
+i8 equ 10000    ; strings
+i9 equ 10000    ; electric piano 2
+
+
+include music.dat

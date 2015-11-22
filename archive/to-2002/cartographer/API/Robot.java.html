@@ -1,0 +1,65 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.rmi.*;
+
+<font color=#0000FF>public</font> <font color=#0000FF>interface</font> Robot <font color=#0000FF>extends</font> Remote{
+
+    <font color=#9A1900>/** 
+     * You need to call the rmic compiler on your implementation class,
+     * and you need to include the following in your constructor
+     *
+     *public Robot(){
+	super();
+	 try {
+            UnicastRemoteObject.exportObject(this);
+        }
+        catch(RemoteException re) {
+            re.printStackTrace();
+	    }
+    }
+    */</font>
+
+    <font color=#9A1900>/** Called by server to submit to you the Lot that has just been auctioned, plus an outcome 
+	
+	PLEASE LOOK IN AUCTION SERVER INTERFACE FOR THE FLAGS FOR THIS CONSTANT
+	NO_CONNECTIONS = no customers conected to server
+	NO_BIDS = no bids (i.e. all bids zero)
+	BELOW_RESERVE  = no bid above reserve price (i.e. at least one bid over zero, but not above reserve)
+	YOU_SOLD_LOT = you submitted a lot for auction and it was succesfully sold
+	
+    *@param lot the lot which was auctioned
+    *@param outcome what happened (as above)
+    */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> auctionResult(Region region,  <font color=#009900>int</font> outcome) <font color=#0000FF>throws</font> RemoteException;
+
+
+    <font color=#9A1900>/** Called by contracts server to get a quote for a specified region.  If you want to quote for the 
+     * job then return a valid quote, else return null
+     *
+     * @param region the region you are quoting for.  If you don't want to quote, return null.
+     */</font>
+    <font color=#0000FF>public</font> Quote getQuote(Region region) <font color=#0000FF>throws</font> RemoteException;
+
+    <font color=#9A1900>/** Called by contracts server to a robot to inform it that quote has been confirmed
+     * by the cartographer and must now be delivered.
+     *
+     *@param quote the quote that has been confirmed.  You must generate the region specified by this
+     * quote and then call deliverContract on the server. 
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> confirmQuote(Quote quote) <font color=#0000FF>throws</font> RemoteException;
+
+
+    <font color=#9A1900>/** Called by contracts server to a robot to tell it a quote was rejected by the server
+     *
+     *@param quote the quote that was rejected.
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> quoteRejected(Quote quote) <font color=#0000FF>throws</font> RemoteException;
+
+
+}
+
+
+</tt>
+</pre>

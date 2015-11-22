@@ -1,0 +1,64 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * Block.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.util.*;
+<font color=#0000FF>import</font> java.io.*;
+<font color=#9A1900>/*import java.awt.*;*/</font>
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> Block <font color=#9A1900>/*extends Panel*/</font> <font color=#0000FF>implements</font> Serializable
+{
+    <font color=#0000FF>public</font> <font color=#009900>boolean</font> north,east,south,west;
+
+    <font color=#0000FF>public</font> Block(<font color=#009900>boolean</font> n, <font color=#009900>boolean</font> e, <font color=#009900>boolean</font> s, <font color=#009900>boolean</font> w)
+    { 
+	north = n;
+	east  = e;
+	south = s;
+	west  = w;
+    }
+    
+    <font color=#009900>int</font> compare(Block testBlock)
+    {
+	<font color=#0000FF>return</font> ( ((testBlock.north == north) ? <font color=#CC33CC>1</font> : <font color=#CC33CC>0</font>) + 
+		 ((testBlock.east  == east ) ? <font color=#CC33CC>1</font> : <font color=#CC33CC>0</font>) + 
+		 ((testBlock.south == south) ? <font color=#CC33CC>1</font> : <font color=#CC33CC>0</font>) + 
+		 ((testBlock.west  == west ) ? <font color=#CC33CC>1</font> : <font color=#CC33CC>0</font>) );
+    }
+      
+    <font color=#0000FF>public</font> Block copy()
+    {
+    	<font color=#0000FF>return</font> <font color=#0000FF>new</font> Block(north,east,south,west);
+    }
+	
+	   
+    <font color=#9A1900>/*public void paint (Graphics g)
+    {	
+	int width, height;
+	width  = this.getSize().width;
+	height = this.getSize().height;
+	int wthickness = width / 15;
+	int hthickness = height / 15;
+	g.setColor(Color.white);
+	g.fillRect(0,0,width,height);
+	g.setColor(Color.black);
+	if (north) { g.fillRect(0,0,width,0+hthickness); }
+	if (east)  { g.fillRect(width-wthickness,0,width,height); }
+	if (south) { g.fillRect(0,height-hthickness,width,height); }
+	if (west)  { g.fillRect(0,0,wthickness,height); }
+    }*/</font>
+
+}
+
+</tt>
+</pre>

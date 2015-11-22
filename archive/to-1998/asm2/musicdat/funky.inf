@@ -1,0 +1,14 @@
+
+i0 equ 20000 ; strings
+i1 equ 0
+i2 equ 10000 ; piano
+i3 equ 10000 ; bass
+i4 equ 0
+i5 equ 0
+i6 equ 2000 ; clash
+i7 equ 2000 ; bass snare
+i8 equ 4000 ; synth snare
+i9 equ 0
+
+
+include music.dat

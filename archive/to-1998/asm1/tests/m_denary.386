@@ -1,0 +1,101 @@
+
+.386
+
+OutD MACRO
+    mov  DSpace[0],'d'
+    mov  DSpace[1],'$'
+    mov  ah,09h
+    mov  dx,offset DSpace
+    int  21h
+    ENDM
+
+outdenary16 MACRO var
+    pusha
+    mov  bx,var
+    call OutDenary
+    OutD
+    popa
+    ENDM
+
+
+Code SEGMENT WORD PUBLIC 'Code' USE16
+ASSUME cs:Code,ds:Code,es:Code
+
+DSpace db 32 dup(?)
+
+Denary db '0','0','0','0','0','0','$'
+OutDenary PROC NEAR
+    pusha
+    push ds
+    mov  ax,@Code
+    mov  ds,ax
+    mov  si,4
+
+    add  bx,0
+    js   Negative
+Positive:
+    jmp  ShowNumber
+
+Negative:
+    mov  Denary[0],'-'
+    inc  si
+    neg  bx
+
+ShowNumber:
+    mov  ax,bx
+
+Units:
+    cwd
+    mov  cx,10
+    div  cx
+    or   dl,110000b
+    mov  Denary[si],dl
+    dec  si
+
+Tens:
+    cwd
+    mov  cx,10
+    div  cx
+    or   dl,110000b
+    mov  Denary[si],dl
+    dec  si
+
+Hundreds:
+    cwd
+    mov  cx,10
+    div  cx
+    or   dl,110000b
+    mov  Denary[si],dl
+    dec  si
+
+Thousands:
+    cwd
+    mov  cx,10
+    div  cx
+    or   dl,110000b
+    mov  Denary[si],dl
+    dec  si
+
+Tenthousands:
+    cwd
+    mov  cx,10
+    div  cx
+    or   dl,110000b
+    mov  Denary[si],dl
+    dec  si
+
+    add  si,6
+    mov  Denary[si],'$'
+
+    mov  ah,09h
+    mov  dx,offset Denary
+    int  21h
+
+    pop  ds
+    popa
+    ret
+OutDenary ENDP
+
+
+Code ENDS
+

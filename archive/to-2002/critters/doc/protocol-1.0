@@ -1,0 +1,146 @@
+----------------
+Critter Protocol
+Version 1.0 
+----------------
+
+#[{..}] means optional data, {..} is required data.
+#I have used BEGIN and END because we have commmands called STOP and START
+
+#messages are sent as:
+# {Command} {number of arguments} [{argument1} {argument2}.....]
+# commands are actually numbers, as set up in '#define's in network.h
+# 'BEGIN' and 'END' codes are NOT implemented. - data is just sent without
+# start/stop markers.
+-----------------
+Client to Server:
+-----------------
+
+START RANDOM BEGIN {width,value} {height, value} [{randomness seeds}] END
+#randomness seeds might be values to give it a shove in the right direction
+#when creating the map and critters.
+
+START 
+#tells the engine to start up (after intial handshaking and map transfer
+#have been done.
+
+STOP
+
+PAUSE
+# also serves as 'UNPAUSE'
+
+SPEED {speed, value}
+#sends a speed value (integer) between 0 and 10, where 10 is fastest, 0 is 
+#slowest. Server then adjusts the speed of simulation accordingly.
+
+LIST
+
+OPEN {filename}
+
+SAVE
+#this has no argument since if it has been loaded from a file, the odl will
+#be overwritten, and if it was started from random then a new filename will
+#be chosen by the server. filenames are just numbers, btw, e.g. 0000001.map
+
+BUFFER BEGIN {top left x,number} {top left y,number} {bottom right x, value}
+{bottom right y,value} END
+#tells the server what area of the map to send each time it calls for a redraw.
+
+STATS_REQ BEGIN {stat type, value} [{stat type, vlaue}....] END
+#tells the server which statistics to send each time it does a generation
+#message contains complete list of all the stats the GUI wants to see
+
+C_INFO BEGIN {uid, value} END
+#requests a set of info about a critter. Expects a reply msg of type 'CRITTER'
+#(see below)
+
+DELAY BEGIN {miliseconds,value} END
+#if the client wants to slow down the simulation, the server delays for this
+#long between generations.
+
+SCRIPT BEGIN {script string} END
+# client just sends the string. server deals with it and must reply as below
+
+QUIT
+# tells server to quit out/finish.
+
+NEWCRIT BEGIN {x,y,i, uchar(index into list)} END
+# 
+
+-----------------
+Server to Client:
+-----------------
+
+CRIT_START
+# no args, tells the client to start getting CRIT_DATA (a list of critter names)
+
+CRIT_DATA {chars, string containing critter name}
+# critters names
+
+CRIT_END
+# no args, tells the client to stop getting CRIT_DATA
+
+MAP_SIZE BEGIN {x_size, value} {y_size,value} END
+#initail message sent to tell the client what size the world is 
+
+TERRAIN BEGIN {terrain, value} [same things for next square]..... END
+#send intial value about the terrain type (altitude & type, as a single char) 
+#in sets of (about) 255 until it has sent the info about the whole world.
+
+CRITTER BEGIN {uid,value} {x,value} {y,value} {exists,boolean}
+	{ [{name,value}..] END
+#sent in response to a 'C_INFO' command.
+#
+#this must include the critter's unique id number, its x and y coordinates
+#in the world map and the "exists" boolean variable. if false, then we know
+#it has died and can take appropriate action. otherwise, we add buffer_window
+#values to x and y and then update the critter in that square with the new
+#values.
+
+REDRAW 
+#tells client to do a redraw
+
+MAP_START
+#tells the client to start getting MAP data
+
+MAP BEGIN {food_status, value} {(uid of)occupant, value} 
+	[same things for next square]....... END
+
+#sends data about each map square, in sets of 128, until it has sent the 
+#requested amount to fill the buffer size. (as set by the last 'BUFFER' command)
+#NB. if the client wants further info on the occupant of the square, it must
+#send a seperate 'C_INFO' msg
+
+STATS BEGIN {stat type,value} {stat value, value} 
+	[{stat type} {stat value}....] END
+#sends data about all the stats the GUI is looking at. (as set by the last 
+#'STATS_REQ' command)
+
+ERROR {error string,value} {type,value} {state,value}
+#can warn user of conflicts, corrupt data, etc.
+#type will indicate whether it is 'fatal' or merely a non-fatal 'warning'
+#if warning, state will indicate whether it is running or suspended.
+#user will then be able to examine the error and choose whether to continue,
+#restart, save the data to a file for examination or stop entirely and choose
+#some new course of action.
+#the user's choice can be transmitted to the server through CONTINUE, START
+#(which will restart a stopped server, but will be ignored by a suspneded or 
+#running server), SAVE or STOP.
+
+OPEN BEGIN {true|false} {filename} [{error string,value}] END
+#this will be returned in answer to an OPEN from the client
+#true for success, false for failure
+#if failure, must give an error string
+#error string could be "not allowed", "doesn't exist", "corrupt file", etc.
+
+SAVE BEGIN {true|false} {filename} [{error string,value}] END
+#this will bre returned in answer to a SAVE from the client
+#true for success, false for failure.
+#if failure, must give an error string as for 'OPEN'
+#whether true or false, must send the filename it used
+#filename can be displayed to the user with notification of success or failure
+
+SCRIPT BEGIN {true|false} [{error string,value}] END
+#true for success, false for failure
+#if failure, must give an error string as for 'OPEN'
+#if true client just displays "OK." on a new line.
+#if true and an error string appears client displays that instead of "OK."

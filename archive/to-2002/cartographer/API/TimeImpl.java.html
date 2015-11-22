@@ -1,0 +1,35 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * TimeImpl.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.rmi.*;
+<font color=#0000FF>import</font> java.rmi.server.UnicastRemoteObject;
+<font color=#0000FF>import</font> java.util.*;
+
+<font color=#0000FF>class</font> TimeImpl <font color=#0000FF>extends</font> UnicastRemoteObject <font color=#0000FF>implements</font> Time
+{
+
+    <font color=#0000FF>public</font> TimeImpl ()  <font color=#0000FF>throws</font> java.rmi.RemoteException 
+    {
+	<font color=#0000FF>super</font>();
+    }
+
+    <font color=#0000FF>public</font> <font color=#009900>long</font> getTime() <font color=#0000FF>throws</font> java.rmi.RemoteException 
+    {
+	<font color=#0000FF>return</font> BankImpl.s_getTime();
+    }
+		
+}
+
+</tt>
+</pre>

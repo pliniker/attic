@@ -1,0 +1,88 @@
+;Error handler
+
+IfError PROC
+    push ax
+    jmp  SKIPMSG1
+SBErr       DB  'Error initialising Sound Blaster',13,10,'$'
+VOCErr      DB  'Error loading VOICE file',13,10,'$'
+DRVErr      DB  'Error loading CT-VOICE.DRV file',13,10,'$'
+BMPErr      DB  'Error loading BMP file',13,10,'$'
+MEMErr      DB  'Memory allocation error',13,10,'$'
+NoERR       DB  'Unknown error',13,10,'$'
+Error       DB  'Error #  h',13,10,'$'
+ErrorNum    DB  'Error code: ','$'
+SKIPMSG1:
+    jc   IFERR
+    pop  ax
+    clc
+    ret
+IFERR:
+    clc
+    SetDs @code
+
+    cmp  bx,01h
+    je   SNDERROR
+    cmp  bx,02h
+    je   VOCERROR
+    cmp  bx,03h
+    je   BMPERROR
+    cmp  bx,04h
+    je   DRVERROR
+    cmp  bx,05h
+    je   MEMERROR
+    jmp  UNKNOWNERR
+SNDERROR:
+    mov  dx,offset SBErr
+    jmp  ERRMSG
+VOCERROR:
+    mov  dx,offset VOCErr
+    jmp  ERRMSG
+BMPERROR:
+    mov  dx,offset BMPErr
+    jmp  ERRMSG
+DRVERROR:
+    mov  dx,offset DRVErr
+    jmp  ERRMSG
+MEMERROR:
+    mov  dx,offset MEMErr
+    jmp  ERRMSG
+UNKNOWNERR:
+    mov  dx,offset NOErr
+    jmp  ERRMSG
+ERRMSG:
+    mov  ah,09h
+    int  21h
+
+HEXERRNUM:
+    mov  ah,09h
+    mov  dx,offset ErrorNum
+    int  21h
+    pop  ax
+    mov  bx,ax
+    call OutHex
+
+    mov  ah,4Ch
+    int  21h
+IfError ENDP
+
+PushAll MACRO
+    push ax
+    push bx
+    push cx
+    push dx
+    push ds
+    push es
+    push si
+    push di
+    ENDM
+
+PopAll MACRO
+    pop  ax
+    pop  bx
+    pop  cx
+    pop  dx
+    pop  ds
+    pop  es
+    pop  si
+    pop  di
+    ENDM

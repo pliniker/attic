@@ -1,0 +1,105 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#9A1900>/**
+ * RobotImpl.java
+ *
+ *
+ * Created: Fri Jun  8 14:26:28 2001
+ *
+ * @author Gus Paul
+ * @version
+ */</font>
+<font color=#0000FF>import</font> java.rmi.*;
+<font color=#0000FF>import</font> java.rmi.server.*;
+<font color=#0000FF>import</font> java.util.*; 
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> RobotImpl <font color=#0000FF>implements</font> Robot {
+    <font color=#0000FF>static</font> <font color=#009900>int</font> myID;
+    <font color=#0000FF>static</font> AuctionServer auction;
+    
+    <font color=#0000FF>public</font> RobotImpl() {
+	<font color=#0000FF>super</font>();
+	<font color=#0000FF>try</font> {
+            UnicastRemoteObject.exportObject(<font color=#0000FF>this</font>);
+        }
+        <font color=#0000FF>catch</font>(RemoteException re) {
+            re.printStackTrace();
+	}
+    }
+    
+    <font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>void</font> auctionResult(Region r, <font color=#009900>int</font> reason) <font color=#0000FF>throws</font> RemoteException 
+	{
+		<font color=#0000FF>switch</font> (reason)
+		{
+			<font color=#0000FF>case</font> AuctionServer.NO_CONNECTIONS :
+				System.out.println(<font color=#FF0000>"Lot "</font> + r.region_id + <font color=#FF0000>"didn't sell: no connections"</font>);<font color=#0000FF>break</font>;
+			<font color=#0000FF>case</font> AuctionServer.NO_BIDS :
+				System.out.println(<font color=#FF0000>"Lot "</font> + r.region_id + <font color=#FF0000>"didn't sell: no bids"</font>);<font color=#0000FF>break</font>;
+			<font color=#0000FF>case</font> AuctionServer.BELOW_RESERVE :
+				System.out.println(<font color=#FF0000>"Lot "</font> + r.region_id + <font color=#FF0000>"didn't sell: below reserve "</font>);<font color=#0000FF>break</font>;
+			<font color=#0000FF>case</font> AuctionServer.YOU_SOLD_LOT :
+				System.out.println(<font color=#FF0000>"Lot "</font> + r.region_id + <font color=#FF0000>"was sold"</font>);<font color=#0000FF>break</font>;
+			<font color=#0000FF>default</font> :
+				System.out.println(<font color=#FF0000>"There's been a fuck up with region "</font> + r.region_id + <font color=#FF0000>""</font>);<font color=#0000FF>break</font>;
+		}
+    }
+   
+    <font color=#0000FF>public</font> Quote getQuote(Region region) <font color=#0000FF>throws</font> RemoteException{
+	System.out.println(<font color=#FF0000>"Robot: getQuote"</font>);
+	<font color=#0000FF>return</font> <font color=#0000FF>new</font> Quote(myID, region, <font color=#CC33CC>32</font>, <font color=#CC33CC>1000</font>, <font color=#CC33CC>500</font>);
+    }	
+
+    <font color=#0000FF>public</font> <font color=#009900>void</font> confirmQuote(Quote quote) <font color=#0000FF>throws</font> RemoteException{
+	System.out.println(<font color=#FF0000>"Robot: confirm quote"</font>);
+	quote.getRegion().setRegion(Region.getSampleRegion(<font color=#CC33CC>0</font>));
+
+	<font color=#0000FF>try</font>{
+	    auction.deliverContract(quote.getRegion(), myID);
+	}
+	<font color=#0000FF>catch</font>(Exception e){
+	    e.printStackTrace();
+	}
+
+	
+    } 
+   
+    <font color=#0000FF>public</font> <font color=#009900>void</font> quoteRejected(Quote quote) <font color=#0000FF>throws</font> RemoteException{}
+    
+    
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#009900>void</font> main(String argv[]){
+	<font color=#0000FF>try</font>{
+	    Bank bank;
+	    auction = (AuctionServer)Naming.lookup(Bank.SERVERPATH + <font color=#FF0000>"/Auction"</font>);
+	    bank = (Bank) Naming.lookup(Bank.SERVERPATH + <font color=#FF0000>"/Bank"</font>);
+	    <font color=#9A1900>//make sure you change localhost to where ever the server is running
+</font>	    
+	    myID = bank.openAccount(<font color=#FF0000>"Robot 0"</font>, bank.ROBOT, <font color=#CC33CC>0</font>);
+	    
+	    RobotImpl robot = <font color=#0000FF>new</font> RobotImpl();
+	    
+	    auction.register(robot, myID);
+	    System.out.println(myID);
+		
+	    <font color=#9A1900>//test code - uncomment this to test the auction 
+</font>	    <font color=#9A1900>//Region test = new Region();
+</font>	    <font color=#9A1900>//auction.submitRegion(test, 10, myID);
+</font>	 	
+
+	}
+	
+	<font color=#0000FF>catch</font>(RemoteException e){
+	    System.out.println(<font color=#FF0000>"Could not find bank/auction server"</font>);
+	    e.printStackTrace();
+	}
+	<font color=#0000FF>catch</font>(InvalidAccountNoException e){
+	    System.out.println(<font color=#FF0000>"Invalid account"</font>);
+	}
+	<font color=#0000FF>catch</font>(Exception e){}
+    }
+
+} <font color=#9A1900>// RobotImp
+</font>
+</tt>
+</pre>

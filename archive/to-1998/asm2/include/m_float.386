@@ -1,0 +1,147 @@
+
+;last updated: 21-02-97
+
+.386
+.387
+
+FloatSub MACRO var1,var2
+    fld  var1
+    fsub var2
+    fst  var1
+    ENDM
+
+FloatAdd MACRO var1,var2
+    fld  var1
+    fadd var2
+    fst  var1
+    ENDM
+
+FloatMul MACRO var1,var2
+    fld  var1
+    fmul var2
+    fst  var1
+    ENDM
+
+FloatDiv MACRO var1,var2
+    fld  var1
+    fdiv var2
+    fst  var1
+    ENDM
+
+; outputs a 32bit real number in hex
+; input in ebx
+
+Exp equ  0
+Mant equ 7
+
+Float db 0,0,0,0,0,0,'e',0,0,'h ','$'
+
+OutFloat PROC NEAR
+    push ds
+    pusha
+    
+    mov  ax,@code
+    mov  ds,ax
+
+    mov  eax,ebx
+    and  ebx,0F0000000h
+    shr  ebx,28
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE91
+    jmp  FSKIPA
+FABOVE91:
+    add  bl,7
+FSKIPA:
+    mov  Float[Mant],bl
+
+    mov  ebx,eax
+    and  ebx,0F000000h
+    shr  ebx,24
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE92
+    jmp  FSKIPB
+FABOVE92:
+    add  bl,7
+FSKIPB:
+    mov  Float[Mant+1],bl
+
+    mov  ebx,eax
+    and  ebx,0F00000h
+    shr  ebx,20
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE93
+    jmp  FSKIPC
+FABOVE93:
+    add  bl,7
+FSKIPC:
+    mov  Float[exp],bl
+
+    mov  ebx,eax
+    and  ebx,0F0000h
+    shr  ebx,16
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE94
+    jmp  FSKIPD
+FABOVE94:
+    add  bl,7
+FSKIPD:
+    mov  Float[exp+1],bl
+
+    mov  ebx,eax
+    and  ebx,0F000h
+    shr  ebx,12
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE95
+    jmp  FSKIPE
+FABOVE95:
+    add  bl,7
+FSKIPE:
+    mov  Float[exp+2],bl
+
+    mov  ebx,eax
+    and  ebx,0F00h
+    shr  ebx,8
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE96
+    jmp  FSKIPF
+FABOVE96:
+    add  bl,7
+FSKIPF:
+    mov  Float[exp+3],bl
+
+    mov  ebx,eax
+    and  ebx,0F0h
+    shr  ebx,4
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE97
+    jmp  FSKIPG
+FABOVE97:
+    add  bl,7
+FSKIPG:
+    mov  Float[exp+4],bl
+
+    mov  ebx,eax
+    and  ebx,0Fh
+    add  bl,30h
+    cmp  bl,39h
+    ja   FABOVE98
+    jmp  FSKIPH
+FABOVE98:
+    add  bl,7
+FSKIPH:
+    mov  Float[exp+5],bl
+
+    mov  ah,09h
+    mov  dx,offset Float
+    int  21h
+    popa
+    pop  ds
+    ret
+OutFloat ENDP

@@ -1,0 +1,85 @@
+Code        SEGMENT WORD 'CODE' USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+SetDs MACRO segname
+assume ds:segname
+    mov  ax,segname
+    mov  ds,ax
+    ENDM
+
+SetReg MACRO SegReg,segname
+assume es:segname
+    mov  ax,segname
+    mov  SegReg,ax
+    ENDM
+
+Delay MACRO delayval
+local delayloop
+    mov  ecx,delayval
+delayloop:
+    dec  ecx
+    jnz  delayloop
+    ENDM
+
+GetIntVec MACRO intno,segm,ofs
+    mov  ah,35h
+    mov  al,intno
+    int  21h
+    mov  ax,es
+    mov  segm,ax
+    mov  ofs,bx
+    ENDM
+
+SetIntVec MACRO intno,seg,ofs
+    push ds
+    mov  ah,25h
+    mov  al,intno
+    mov  dx,seg
+    mov  ds,dx
+    mov  dx,ofs
+    int  21h
+    pop  ds
+    ENDM
+
+CreateFile  MACRO   path,attrib
+    clc
+    mov  dx,offset path
+    mov  cx,attrib
+    mov  ah,4Ch
+    int  21h
+    ENDM
+
+OpenFile    MACRO   path,access
+    clc
+    mov  dx,offset path
+    mov  al,access
+    mov  ah,3Dh
+    int  21h
+    ENDM
+
+CloseFile   MACRO   handle
+    clc
+    mov  bx,handle
+    mov  ah,3Eh
+    int  21h
+    ENDM
+
+WriteFile   MACRO   handle,data,bytes
+    clc
+    mov  bx,handle
+    mov  dx,offset data
+    mov  cx,bytes
+    mov  ah,40h
+    int  21h
+    ENDM
+
+ReadFile    MACRO   handle,buffer,bytes
+    clc
+    mov  bx,handle
+    mov  dx,offset buffer
+    mov  cx,bytes
+    mov  ah,3Fh
+    int  21h
+    ENDM
+
+Code ENDS

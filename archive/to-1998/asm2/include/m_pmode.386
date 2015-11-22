@@ -1,0 +1,162 @@
+
+; last updated: 02-03-97
+
+%out * * * Protected mode * * *
+
+e equ db 66h ; 32 bit instructions
+
+; IMPORTANT:
+;   these program extensions cannot be used while EMM386, QEMM, 386MAX or
+;   any other expanded memory manager is in memory.
+;   call Test_V86 first to warn the user of this.
+; before the second 2 functions can be used, first call Protected_Mode
+; otherwise your program will crash.
+
+.386P
+
+Code    SEGMENT 'CODE' USE16 PUBLIC
+        ASSUME  cs:Code,ds:Code
+
+GDT     dw  0               ; dummy descriptor
+        db  0,0,0
+        db  0
+        dw  0
+
+        dw  0FFFFh          ; seg length 1
+        db  00h,00h,00h     ; seg address
+        db  092h            ; flags & access rights
+        dw  0FFCFh          ; seg length 2
+
+GDT_Ofs db 0,0,0,0,0,0
+
+; error message to user saying that the CPU is already in V86 mode
+V86_err db 13,10
+        db '                                PROGRAM HALTED!',13,10
+        db 'The processor is already in V86 mode!',13,10
+        db 'Please restart the system without any expanded memory managers:',13,10
+        db '    EMM386, QEMM, 386MAX and any multitasking environments such as Windows.',13,10,'$'
+
+; test if the processor is in V86 mode
+Test_V86 PROC NEAR
+    mov  eax,cr0
+    and  ax,1
+    cmp  ax,0
+    jne  V86_Mode
+    ret
+V86_Mode:
+ASSUME ds:Code
+    mov  ax,Code
+    mov  ds,ax
+    mov  ah,09h
+    mov  dx,offset V86_err
+    int  21h
+    mov  ah,4Ch
+    int  21h
+Test_V86 ENDP
+
+; enter protected mode & set fs & gs to 4Gb segs
+Protected_Mode PROC NEAR
+    mov  ax,Code
+    mov  ds,ax
+    mov  es,ax
+
+    mov  GDT_Ofs[0],16
+    mov  eax,seg GDT
+    shl  eax,4
+    mov  bx,offset GDT
+    movzx ebx,bx
+    add  eax,ebx
+    mov  dword ptr GDT_Ofs[2],eax
+    lgdt pword ptr GDT_Ofs
+
+    mov  bx,08h
+    cli
+    mov  eax,cr0
+    or   eax,1
+    mov  cr0,eax
+    jmp  PMode
+    PMode:
+    
+    mov  gs,bx
+    mov  fs,bx
+    mov  es,bx
+    mov  ds,bx
+
+    and  al,0FEh
+    mov  cr0,eax
+    jmp  RMode
+    RMode:
+    sti
+
+    ret
+    ENDP
+
+Go_PMODE PROC NEAR
+    cli
+    mov  eax,cr0
+    or   eax,1
+    mov  cr0,eax
+    jmp  PModeJ
+    PModeJ:
+    ret
+Go_PMODE ENDP
+
+Go_RMODE PROC NEAR
+    and  al,0FEh
+    mov  cr0,eax
+    jmp  RModeJ
+    RModeJ:
+    sti
+    ret
+Go_RMODE ENDP
+
+; - - - - Copy from DOS to Real
+CopyBlock_DOS_to_RMEM MACRO sSeg,sOfs,dSeg,dOfs,size
+ASSUME ds:sSeg
+    mov  ax,sSeg
+    mov  ds,ax
+    mov  di,sOfs
+    mov  cx,size
+ASSUME fs:dSeg
+    mov  ax,dSeg
+    mov  fs,ax
+    mov  esi,dOfs
+    call _CopyBlock_DOS_to_RMEM
+    ENDM
+_CopyBlock_DOS_to_RMEM PROC NEAR
+CopyBlock_to_RMEM:
+    mov  al,[di]
+    mov  fs:[esi],al
+    inc  di
+    inc  esi 
+    dec  cx
+    jnz  CopyBlock_to_RMEM
+    ret
+_CopyBlock_DOS_to_RMEM ENDP
+
+
+; - - - - Copy from Real to DOS
+CopyBlock_RMEM_to_DOS MACRO sSeg,sOfs,dSeg,dOfs,size
+    mov  cx,size
+ASSUME ds:dSeg
+    mov  ax,dSeg
+    mov  ds,ax
+    mov  di,dOfs
+ASSUME fs:sSeg
+    mov  ax,sSeg
+    mov  fs,ax
+    mov  esi,sOfs
+    call _CopyBlock_RMEM_to_DOS
+    ENDM
+_CopyBlock_RMEM_to_DOS PROC NEAR
+CopyBlock_to_DOS:
+    mov  al,fs:[esi]
+    mov  [di],al
+    inc  di
+    inc  esi
+    dec  cx
+    jnz  CopyBlock_to_DOS
+    ret
+_CopyBlock_RMEM_to_DOS ENDP
+
+Code ENDS

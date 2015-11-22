@@ -1,0 +1,111 @@
+
+
+; clear the sample data
+ClearData PROC NEAR
+    push es
+    ASSUME es:Samples1
+    mov  ax,Samples1
+    mov  es,ax
+    mov  di,offset SData
+    mov  cx,SLength
+    mov  al,0
+    cld
+    rep  stosb
+    pop  es
+    ret
+ClearData ENDP
+
+GetSample MACRO snum
+; copy the sample data back from real mem
+    push  ds
+    ASSUME ds:Samples1
+    mov  ax,Samples1
+    mov  ds,ax
+
+    mov  bx,snum
+    shl  bx,2
+    mov  esi,SOffsets[bx]
+    shr  bx,1
+    mov  cx,SLengths[bx]
+
+    mov  edx,offset SamplesData + AddOffset
+    add  edx,esi
+    mov  bx,offset SData
+    pop  ds
+
+    CopyBlock_RMEM_to_DOS Samples1,edx, Samples1,bx, cx
+    ENDM
+
+; instrument loading procedures
+%out instrument loading
+
+LoadSample MACRO segment,ofs,len
+local IFNOTEXISTS
+    push ds
+    ASSUME ds:segment
+    mov  ax,segment
+    mov  ds,ax
+    OpenFile    SName,00h
+    jc   IFNOTEXISTS
+    mov  SHandle,ax
+    ReadFile    SHandle,[ofs],len
+    CloseFile   SHandle
+IFNOTEXISTS:
+    pop  ds
+    ENDM    
+
+NewInstr MACRO num
+    push ds
+    SetDs Samples1
+    mov  al,num
+    mov  SName[6],al
+    pop  ds
+    ENDM
+
+; load a single instrument
+LoadInstr MACRO ofs,len
+; load the sample
+    LoadSample Samples1,SData,len
+; copy the sample data to real mem
+    mov  dx,offset SData        
+    mov  ebx,offset SamplesData[ofs+AddOffset]
+    CopyBlock_DOS_to_RMEM Samples1,dx, Samples1,ebx, len
+    ENDM
+
+; load all the instruments
+LoadInstruments PROC NEAR
+    NewInstr '0'
+    LoadInstr 0*65536,65535
+    NewInstr '1'
+    LoadInstr 1*65536,65535
+    NewInstr '2'
+    LoadInstr 2*65536,65535
+    NewInstr '3'
+    LoadInstr 3*65536,65535
+    NewInstr '4'
+    LoadInstr 4*65536,65535
+    NewInstr '5'
+    LoadInstr 5*65536,65535
+    NewInstr '6'
+    LoadInstr 6*65536,65535
+    NewInstr '7'
+    LoadInstr 7*65536,65535
+    NewInstr '8'
+    LoadInstr 8*65536,65535
+    NewInstr '9'
+    LoadInstr 9*65536,65535
+    NewInstr 'A'
+    LoadInstr 10*65536,65535
+    NewInstr 'B'
+    LoadInstr 11*65536,65535
+    NewInstr 'C'            
+    LoadInstr 12*65536,65535
+    NewInstr 'D'
+    LoadInstr 13*65536,65535
+    NewInstr 'E'
+    LoadInstr 14*65536,65535
+    NewInstr 'F'
+    LoadInstr 15*65536,65535
+    ret
+LoadInstruments ENDP
+

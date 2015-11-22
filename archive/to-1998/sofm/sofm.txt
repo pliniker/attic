@@ -1,0 +1,125 @@
+
+  Networks Based On Unsupervised Learning
+-=ððððððððððððððððððððððððððððððððððððððð=-
+
+Unsupervised learning so there is no defined correct answer. The network
+has to learn by discovering & exploiting any structure found in the inputs.
+
+Unsupervised NonCompetitive Networks
+------------------------------------
+Hebbian learning is suitable because units that respond more undergo more
+learning.
+
+    ëw = àxy
+
+but to prevent unlimited weight growth
+
+    ëw = à(xy - yw)
+
+ or ëw = à(xy - (y^2) * w)
+
+where
+    ëw = change in weight
+    à  = learning rate coefficient
+    x  = input
+    y  = previous output
+    w  = previous weight
+
+Principal Component Analysis
+----------------------------
+When the weights stabilise using ëw = à(xy - (y^2)w) the unit learns to
+perform PCA on the inputs. PCA helps uncover structure in data that might be
+hidden.
+Another learning algorithm is:
+
+ ëw = à(xy - w * ºwº^2)
+
+The activation function is linear = äxw
+
+Multi-layer Networks
+--------------------
+The layers are labelled A,B,C..G
+Layer A receives external inputs and G gives the high level outputs.
+A unit in a layer reveives inputs from a group of units in the previous
+layer.
+The activation function is linear = á + äxw where á is some constant
+and the learning algorithm is
+
+    ëw = (à1 * wy) + (à2 * x) + (à3 * y) + à4
+
+where ài are coefficients, à1 > 0 is the learning rate.
+
+Unsupervised Competitive Learning Networks
+------------------------------------------
+Units are organised into 1 or more layers, the units in a layer are grouped
+into disjoint clusters. Each unit in the clusters inhibits the other units
+to compete for the winning position. Th unit receiving the largest input
+gives maximum output and drives the others to zero. A unit learns only if it
+wins. The weight values are shifted towards the input pattern vector.
+
+Vector Quantisation
+-------------------
+Initialise weights to small random numbers.
+Find prototype unit:
+
+    ºx - wº = minºw - xº
+
+Alter weights by:
+
+    ëw = à(x - w)
+
+
+Self Organising Feature Map Networks
+====================================
+This is a one, two or three dimensional array of neurons.
+
+           /   /   /
+    o----O---O---O
+    o   /|/  |/  |/
+    o  / O---O---O
+    o /  |/  |/  |/
+    o/   O---O---O
+
+  inputs     neurons
+       weights     outputs
+    (x)  (w)
+
+x goes fully to each unit through adaptable weights w. The unit with the
+weight vector closest to the input pattern wins. The winner responds maximally
+& shares the learning experience with neighbouring units, aligning their
+weights towards x and more distand units weights are shifted away from x.
+
+Consider a 2 dimensional array of neurons.
+Each neuron can be given an (x,y) coordinate.
+
+    net = äwx + ävy
+
+where
+    w = weight vector
+    x = input vector
+and vy = the connections from external units connected to the unit through
+weight vector v.
+
+the activation function =
+
+    ºw - xº = minºw - xº
+
+meaning the unit activated is the unit with the weight vector closest to the
+input vector.
+
+the learning algorithm =
+
+    ëw = àh(x - w)
+
+where
+    à = learning rate coefficient
+    h = a function of the distance from the central unit (neighbourhood
+        parameter)
+    x = the input
+    w = the old weight
+
+As the training sets are given slowly reduce à and the neighbourhood
+parameters.
+
+When the neighbourhood parameter is reduced to the winning unit only, the
+network performs vector quantisation.

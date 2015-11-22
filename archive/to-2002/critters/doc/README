@@ -1,0 +1,12 @@
+
+To rebuild the source code:
+
+enter each subdirectory of src and type
+Make
+
+to make buildlib go to src/engine/Library and type
+Make buildlib
+
+to compile client gtk 1.2 is needed.
+(RedHat 6.0 has this)
+

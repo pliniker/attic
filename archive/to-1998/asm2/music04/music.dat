@@ -1,0 +1,10 @@
+
+Channels equ 0
+samplerate equ ( 256 - ( 1000000 / 11025 ) )
+bpm equ 1193180 / (125 * 60) *120
+speed equ 9
+songlength equ 1
+
+MusicData LABEL BYTE
+
+db endsong

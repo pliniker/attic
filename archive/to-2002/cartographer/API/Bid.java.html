@@ -1,0 +1,35 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#9A1900>/**
+ * Bid.java
+ *
+ *
+ * Created: Thu Jun 21 15:23:31 2001
+ *
+ * @author Gus Paul
+ * @version 1.0
+ */</font>
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> Bid <font color=#0000FF>implements</font> java.io.Serializable {
+    
+    <font color=#0000FF>private</font> <font color=#009900>int</font> amount;
+    <font color=#0000FF>private</font> <font color=#009900>int</font> id;
+
+    <font color=#0000FF>public</font> Bid(<font color=#009900>int</font> id, <font color=#009900>int</font> amount) {
+	<font color=#0000FF>this</font>.amount = amount;
+	<font color=#0000FF>this</font>.id = id;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getAmount(){
+	<font color=#0000FF>return</font> amount;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getID(){
+	<font color=#0000FF>return</font> id;
+    }
+    
+} <font color=#9A1900>// Bid
+</font></tt>
+</pre>

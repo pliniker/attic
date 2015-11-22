@@ -1,0 +1,20 @@
+
+; last updated: 20-01-96
+
+; needs m_dos.386
+
+DRVLoad PROC NEAR    
+    SetDs @data
+    OpenFile    DrvName,00h
+    mov  bx,4
+    call IfError
+    mov  DrvHandle,ax
+    ReadFile    DrvHandle,DrvBuffer,31688
+    mov  bx,4
+    call IfError
+    CloseFile   DrvHandle
+    mov  bx,4
+    call IfError
+    ret
+DRVLoad ENDP
+

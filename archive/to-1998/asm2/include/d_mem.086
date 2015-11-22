@@ -1,0 +1,12 @@
+
+; last updated: 20-01-96
+
+SetDs MACRO setds
+    mov  ax,setds
+    mov  ds,ax
+    ENDM
+
+SetReg MACRO SegReg,val
+    mov  ax,val
+    mov  SegReg,ax
+    ENDM

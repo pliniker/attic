@@ -1,0 +1,118 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * Account.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.util.*;
+<font color=#0000FF>import</font> java.io.*;
+
+<font color=#0000FF>class</font> Account
+{
+	<font color=#0000FF>private</font> <font color=#009900>int</font> totalAccuracy = <font color=#CC33CC>1000</font>;
+	<font color=#0000FF>private</font> <font color=#009900>long</font> totalTime = <font color=#CC33CC>0</font>;
+	<font color=#0000FF>private</font> <font color=#009900>int</font> noOfTimes = <font color=#CC33CC>1</font>, noOfAccuracies = <font color=#CC33CC>1</font>;
+	
+	<font color=#0000FF>private</font> String Name;
+	<font color=#0000FF>private</font> <font color=#009900>int</font> groupType, groupNumber, balance, accountNumber;
+	<font color=#0000FF>private</font> Vector history;
+	
+	<font color=#0000FF>public</font> Account(String _Name, <font color=#009900>int</font> _groupType, <font color=#009900>int</font> _groupNumber)
+	{
+		balance = <font color=#CC33CC>0</font>;
+		Name = _Name;
+		groupType = _groupType;
+		groupNumber = _groupNumber;
+		history = <font color=#0000FF>new</font> Vector();
+		history.addElement(<font color=#0000FF>new</font> Transaction(<font color=#CC33CC>0</font>,BankImpl.SERVICEPROVIDERACCOUNTNUMBER,<font color=#FF0000>"New account opened!"</font>));
+	}
+
+	<font color=#0000FF>public</font> <font color=#009900>void</font> printStatement(PrintStream psout)
+	{
+		Transaction t;
+		Enumeration e = history.elements();
+		<font color=#009900>int</font> runningTotal = <font color=#CC33CC>0</font>;
+		
+		<font color=#0000FF>while</font> (e.hasMoreElements())
+		{
+			t = (Transaction)e.nextElement();
+			runningTotal = t.printStatementLine(runningTotal,psout);
+		}
+	}
+	
+	<font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>void</font> doTransaction(Transaction t)
+	{
+		balance+=t.getAmount();
+		history.addElement(t);
+	}
+	
+	<font color=#0000FF>public</font> <font color=#009900>void</font> setAccountNumber(<font color=#009900>int</font> _accountNumber)
+	{
+		accountNumber = _accountNumber;	
+	}
+	
+	<font color=#0000FF>public</font> <font color=#009900>int</font> getAccountNumber()
+	{
+		<font color=#0000FF>return</font> accountNumber;	
+	}
+	
+	<font color=#0000FF>public</font> <font color=#009900>boolean</font> equals(Object obj)
+	{
+		<font color=#0000FF>if</font> (obj <font color=#0000FF>instanceof</font> Account)
+		{
+			Account testAccount = (Account)obj;
+			<font color=#0000FF>return</font> ( testAccount.Name.equals(Name) &amp;&amp; 
+					(testAccount.groupType == groupType) &amp;&amp; 
+					(testAccount.groupNumber == groupNumber) );
+		}
+		<font color=#0000FF>else</font>
+		{
+			<font color=#0000FF>return</font> false;
+		}
+	}
+
+	<font color=#0000FF>synchronized</font> <font color=#009900>void</font> newAccuracy(<font color=#009900>int</font> accuracy) 
+	{
+		totalAccuracy+=accuracy;
+		noOfAccuracies++;
+	}
+	
+	<font color=#0000FF>synchronized</font> <font color=#009900>void</font> newTime(<font color=#009900>long</font> time)
+	{
+		totalTime+=time;
+		noOfTimes++;
+	}
+	
+
+	<font color=#9A1900>// Default setters
+</font>	<font color=#9A1900>// public void setBalance(int $balance) { balance = $balance; }
+</font>
+	<font color=#9A1900>// Default getters
+</font>	<font color=#0000FF>public</font> <font color=#009900>int</font> getBalance()         { <font color=#0000FF>return</font> balance; }
+	<font color=#0000FF>public</font> <font color=#009900>int</font> getID()         { <font color=#0000FF>return</font> groupNumber; }
+	<font color=#0000FF>public</font> <font color=#009900>int</font> getGroupNumber()     { <font color=#0000FF>return</font> groupNumber; }
+	<font color=#0000FF>public</font> String getName() { <font color=#0000FF>return</font> Name; }
+	<font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>long</font> getTimeReputation() { <font color=#0000FF>return</font> (totalTime / noOfTimes); }
+	<font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>int</font> getAccuracyReputation() { <font color=#0000FF>return</font> (totalAccuracy / noOfAccuracies); }
+	
+ 	
+	<font color=#9A1900>// Predicates
+</font>	<font color=#0000FF>public</font> <font color=#009900>boolean</font> isRobot()           { <font color=#0000FF>return</font> (groupType == Bank.ROBOT); }
+	<font color=#0000FF>public</font> <font color=#009900>boolean</font> isCartographer()    { <font color=#0000FF>return</font> (groupType == Bank.CARTOGRAPHER); }
+	<font color=#0000FF>public</font> <font color=#009900>boolean</font> isServiceProvider() { <font color=#0000FF>return</font> (groupType == Bank.SERVICEPROVIDER); }
+
+	<font color=#0000FF>public</font> <font color=#009900>boolean</font> hasSufficientFunds()
+	{
+	       <font color=#0000FF>return</font> ( balance &gt;= Bank.OVERDRAFTLIMIT );
+	}
+}
+</tt>
+</pre>

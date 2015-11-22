@@ -1,0 +1,326 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * BankImpl.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+ 
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.rmi.*;
+<font color=#0000FF>import</font> java.rmi.server.UnicastRemoteObject;
+<font color=#0000FF>import</font> java.util.*;
+<font color=#0000FF>import</font> java.io.*;
+
+<font color=#0000FF>class</font> BankImpl <font color=#0000FF>extends</font> UnicastRemoteObject <font color=#0000FF>implements</font> Bank, Time
+{
+	<font color=#0000FF>private</font> <font color=#0000FF>static</font> Random generator = <font color=#0000FF>new</font> Random();
+	<font color=#0000FF>static</font> <font color=#009900>int</font> SERVICEPROVIDERACCOUNTNUMBER = -<font color=#CC33CC>1</font>;
+	
+	<font color=#0000FF>private</font> Hashtable accounts = <font color=#0000FF>new</font> Hashtable();
+	<font color=#0000FF>private</font> Vector validAccountNos = <font color=#0000FF>new</font> Vector();
+	<font color=#0000FF>private</font> <font color=#009900>int</font> accountHash1, accountHash2;
+	<font color=#0000FF>private</font> Timer myTime;
+
+	<font color=#0000FF>static</font> <font color=#0000FF>private</font> <font color=#009900>int</font> next_region_id = <font color=#CC33CC>0</font>;
+
+	<font color=#9A1900>/**
+	/* Does the interest 
+	 */</font>
+	<font color=#0000FF>synchronized</font> <font color=#009900>void</font> addInterest()
+	{
+		Enumeration allAccounts = accounts.elements();
+		Account myAccount;
+		<font color=#009900>float</font> interest;
+		
+		<font color=#0000FF>if</font> (SERVICEPROVIDERACCOUNTNUMBER != -<font color=#CC33CC>1</font>)
+		{
+			<font color=#0000FF>while</font> (allAccounts.hasMoreElements())
+			{	
+				myAccount = (Account)allAccounts.nextElement();
+				<font color=#9A1900>//System.out.println(myAccount.getAccountNumber());
+</font>				<font color=#0000FF>if</font> (SERVICEPROVIDERACCOUNTNUMBER != myAccount.getAccountNumber())
+				{
+			
+					<font color=#009900>int</font> balance = myAccount.getBalance();
+			
+					<font color=#0000FF>if</font> (balance &gt;= <font color=#CC33CC>0</font>) {interest = (<font color=#009900>float</font>)<font color=#CC33CC>0.0</font>;}
+			
+					<font color=#0000FF>else</font> <font color=#0000FF>if</font> (balance &gt;= Bank.OVERDRAFTLIMIT) {interest = (-balance) * Bank.INTERESTRATE; }
+			
+					<font color=#0000FF>else</font> { interest = (-Bank.OVERDRAFTLIMIT) * Bank.INTERESTRATE + (-(balance - Bank.OVERDRAFTLIMIT)) * Bank.OVERDRAWNINTERESTRATE; }
+			
+					<font color=#0000FF>try</font> 
+					{ 
+						<font color=#0000FF>if</font> ((<font color=#009900>int</font>)interest != <font color=#CC33CC>0</font>)
+						{
+							<font color=#9A1900>// System.out.println("Adding interest " + interest);
+</font>							transfer(myAccount.getAccountNumber(), BankImpl.SERVICEPROVIDERACCOUNTNUMBER, (<font color=#009900>int</font>)interest, <font color=#FF0000>"INTEREST"</font>);
+						}
+					}
+					<font color=#0000FF>catch</font> (InvalidAccountNoException e)
+					{
+						System.out.println(<font color=#FF0000>"If you see this something has gone badly wrong!"</font>);
+					}
+			
+				}		
+			}
+		}
+		<font color=#9A1900>// System.out.println("Adding interest!");
+</font>	}
+	
+	<font color=#9A1900>/**
+	* Generates a random integer between
+	* zero and value - 1.
+	*/</font>
+	 <font color=#0000FF>static</font> <font color=#009900>int</font> random(<font color=#009900>int</font> value)
+	{
+		<font color=#0000FF>return</font> (<font color=#009900>int</font>)(generator.nextFloat() * (<font color=#009900>float</font>)value);
+	}
+
+    <font color=#0000FF>public</font> BankImpl ()  <font color=#0000FF>throws</font> java.rmi.RemoteException 
+	{
+		<font color=#0000FF>super</font>();
+		accountHash1 = <font color=#0000FF>this</font>.random(<font color=#CC33CC>50</font>) + <font color=#CC33CC>5</font>;
+		accountHash2 = <font color=#0000FF>this</font>.random(<font color=#CC33CC>50</font>) + <font color=#CC33CC>5</font>;
+		myTime = <font color=#0000FF>new</font> Timer();
+		myTime.scheduleAtFixedRate(<font color=#0000FF>new</font> BankTimerTask(<font color=#0000FF>this</font>),<font color=#CC33CC>0</font>,Bank.INTERESTTIMEBASE * <font color=#CC33CC>1000</font>);
+    }
+	
+	  <font color=#0000FF>synchronized</font> <font color=#009900>void</font> transfer(<font color=#009900>int</font> from, <font color=#009900>int</font> to, <font color=#009900>int</font> amount, String description) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		Account aTo, aFrom;
+		<font color=#0000FF>if</font> (!isValid(from) || !isValid(to)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		aTo = (Account)accounts.get(numberUnHash(to));
+		aFrom = (Account)accounts.get(numberUnHash(from));
+
+		<font color=#9A1900>// Throw exception if funds are insufficient
+</font>		<font color=#9A1900>//if (aFrom.isCartographer() &amp;&amp; !aFrom.hasSufficientFunds()) { throw new InsufficientFundsException(); }
+</font>
+		<font color=#9A1900>// Apply fine if over overdraft limit
+</font>		<font color=#0000FF>if</font> ( !aFrom.hasSufficientFunds() )
+			<font color=#0000FF>if</font> ( ! ( description.equals(<font color=#FF0000>"FINE"</font>) || description.equals(<font color=#FF0000>"INTEREST"</font>) ) )
+			{ 
+				transfer(from,BankImpl.SERVICEPROVIDERACCOUNTNUMBER,Bank.OVERDRAWNFINE,<font color=#FF0000>"FINE"</font>);
+			}
+
+		  aTo.doTransaction(<font color=#0000FF>new</font> Transaction( amount,from,description));
+		aFrom.doTransaction(<font color=#0000FF>new</font> Transaction(-amount,to,  description));
+		
+		<font color=#9A1900>//aTo.setBalance(aTo.getBalance() + amount);
+</font>		<font color=#9A1900>//aFrom.setBalance(aFrom.getBalance() + - amount);
+</font>		
+		<font color=#0000FF>return</font>;
+	}
+	
+	 <font color=#009900>boolean</font> isValid(<font color=#009900>int</font> accountNo)
+	{
+	   <font color=#0000FF>return</font> validAccountNos.contains(<font color=#0000FF>new</font> Integer(accountNo));
+	}
+	
+	<font color=#0000FF>private</font> <font color=#009900>boolean</font> isValid(Integer in)
+	{
+		<font color=#0000FF>return</font> isValid(in.intValue());
+	}
+	
+	
+	 <font color=#009900>int</font> getGroupNumber(<font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isValid(accountNo)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		<font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNo))).getGroupNumber();
+	}
+	
+	 <font color=#009900>boolean</font> isCartographer(<font color=#009900>int</font> accountNo)
+	{
+		<font color=#9A1900>//System.out.println("isCartographer called:"+isValid(accountNo));
+</font>		<font color=#0000FF>if</font> (isValid(accountNo)) <font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNo))).isCartographer();
+		<font color=#0000FF>else</font> <font color=#0000FF>return</font> false;
+	}
+
+	 <font color=#009900>boolean</font> isRobot(<font color=#009900>int</font> accountNo)
+	{
+		<font color=#9A1900>//System.out.println("isRobot called:"+isValid(accountNo));
+</font>		<font color=#0000FF>if</font> (isValid(accountNo)) <font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNo))).isRobot();
+		<font color=#0000FF>else</font> <font color=#0000FF>return</font> false;
+	}
+
+	<font color=#0000FF>private</font> <font color=#009900>boolean</font> isRobot(Integer in)
+	{
+		<font color=#0000FF>return</font> isRobot(in.intValue());
+	}
+	
+	
+	 <font color=#009900>boolean</font> isServiceProvider(<font color=#009900>int</font> accountNo)
+	{
+		<font color=#0000FF>if</font> (isValid(accountNo)) <font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNo))).isServiceProvider();
+		<font color=#0000FF>else</font> <font color=#0000FF>return</font> false;
+	}
+
+	<font color=#0000FF>private</font> Integer numberHash(<font color=#009900>int</font> in)
+	{
+		<font color=#0000FF>return</font> <font color=#0000FF>new</font> Integer((in + accountHash1) * accountHash2);
+	}
+	
+	<font color=#0000FF>private</font> Integer numberUnHash(<font color=#009900>int</font> in)
+	{
+		<font color=#0000FF>return</font> <font color=#0000FF>new</font> Integer((in / accountHash2) - accountHash1);
+	}
+
+	<font color=#0000FF>private</font> Integer numberHash(Integer in)
+	{
+		<font color=#0000FF>return</font> numberHash(in.intValue());
+	}
+	
+	<font color=#0000FF>private</font> Integer numberUnHash(Integer in)
+	{
+		<font color=#0000FF>return</font> numberUnHash(in.intValue());
+	}
+	
+	<font color=#0000FF>synchronized</font> <font color=#0000FF>public</font> <font color=#009900>int</font> openAccount(String Name, <font color=#009900>int</font> grouptype, <font color=#009900>int</font> groupnumber) <font color=#0000FF>throws</font> java.rmi.RemoteException
+	{
+		Account newAccount = <font color=#0000FF>new</font> Account(Name, grouptype, groupnumber+grouptype);
+		<font color=#0000FF>if</font> (!accounts.contains(newAccount))
+		{
+			accounts.put(<font color=#0000FF>new</font> Integer(grouptype+groupnumber),newAccount);
+			newAccount.setAccountNumber(numberHash(grouptype+groupnumber).intValue());
+			<font color=#9A1900>// System.out.println("New Account is " + newAccount.getAccountNumber());
+</font>			validAccountNos.addElement(<font color=#0000FF>new</font> Integer(newAccount.getAccountNumber()));
+			<font color=#0000FF>return</font> newAccount.getAccountNumber();
+		}
+		<font color=#0000FF>else</font>
+		{
+			<font color=#0000FF>return</font> ((Account)accounts.get(<font color=#0000FF>new</font> Integer(grouptype+groupnumber))).getAccountNumber();
+		}
+	}
+	
+	<font color=#0000FF>public</font> <font color=#009900>int</font> getBalance(<font color=#009900>int</font> accountNum) <font color=#0000FF>throws</font> java.rmi.RemoteException ,InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isValid(accountNum)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		<font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNum))).getBalance();
+	}
+	
+	<font color=#0000FF>public</font> String getName(<font color=#009900>int</font> accountNum) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isValid(accountNum)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		<font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNum))).getName();
+	}
+	
+	<font color=#009900>int</font> getRobotID(<font color=#009900>int</font> accountNum) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isRobot(accountNum)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		<font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNum))).getID() - Bank.ROBOT;
+	}
+	
+	<font color=#009900>int</font> getCartographerID(<font color=#009900>int</font> accountNum) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isCartographer(accountNum)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		<font color=#0000FF>return</font> ((Account)accounts.get(numberUnHash(accountNum))).getID() - Bank.CARTOGRAPHER;;
+	}
+	
+	<font color=#0000FF>public</font> Vector getCartographers() <font color=#0000FF>throws</font> java.rmi.RemoteException
+	{
+		Vector temp = <font color=#0000FF>new</font> Vector();
+		Enumeration allAccounts = validAccountNos.elements();
+		<font color=#009900>int</font> myAccount;
+		
+			<font color=#0000FF>while</font> (allAccounts.hasMoreElements())
+			{	
+				myAccount = ((Integer)allAccounts.nextElement()).intValue();
+				<font color=#0000FF>if</font> (isCartographer(myAccount)) { temp.addElement(<font color=#0000FF>new</font> Integer(myAccount)); }
+			}
+		<font color=#0000FF>return</font> temp;
+	}
+	
+	<font color=#009900>void</font> printStatement(<font color=#009900>int</font> accountNum, PrintStream psout) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isValid(accountNum)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		psout.println(<font color=#FF0000>"\nStatement of account "</font> + accountNum + <font color=#FF0000>" for group "</font>+ ((Account)accounts.get(numberUnHash(accountNum))).getName());
+		psout.println(<font color=#FF0000>"==============================================================="</font>);
+		psout.println(<font color=#FF0000>"Balance\tTrans\tPerson\tTime\tComment"</font>);
+		psout.println(<font color=#FF0000>"==============================================================="</font>);
+		((Account)accounts.get(numberUnHash(accountNum))).printStatement(psout);
+		psout.println(<font color=#FF0000>"==============================================================="</font>);
+		psout.println(<font color=#FF0000>"Final balance: "</font> + ((Account)accounts.get(numberUnHash(accountNum))).getBalance());
+	}
+	
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#009900>void</font> main(String[] args) 
+	{
+        System.setSecurityManager(<font color=#0000FF>new</font> RMISecurityManager());
+
+        <font color=#0000FF>try</font> 
+		{
+            BankImpl myBank = <font color=#0000FF>new</font> BankImpl();
+            Naming.rebind(<font color=#FF0000>"/Bank"</font>,myBank);
+        }
+		<font color=#0000FF>catch</font> (Exception e) 
+		{
+            System.out.println(e.getMessage() );
+        }
+    }
+
+    <font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>int</font>  getNextRegionID() <font color=#0000FF>throws</font> java.rmi.RemoteException
+    {
+		<font color=#0000FF>return</font> (++next_region_id);
+    }
+ 
+    <font color=#0000FF>static</font> <font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>int</font> s_getNextRegionID()
+    {
+		<font color=#0000FF>return</font> (++next_region_id);
+    }
+	
+	<font color=#0000FF>public</font> <font color=#009900>long</font>  getTimeReputation(<font color=#009900>int</font> RoboNo) <font color=#0000FF>throws</font> java.rmi.RemoteException, InvalidAccountNoException
+	{
+		<font color=#009900>int</font> pos = RoboNo + Bank.ROBOT;
+		<font color=#0000FF>if</font> (!isValid(numberHash(pos)) || !isRobot(numberHash(pos))) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		<font color=#0000FF>return</font> ((Account)accounts.get(<font color=#0000FF>new</font> Integer(pos))).getTimeReputation();
+		}
+	
+	<font color=#0000FF>public</font> <font color=#009900>int</font>   getAccuracyReputation(<font color=#009900>int</font> RoboNo) <font color=#0000FF>throws</font> java.rmi.RemoteException, InvalidAccountNoException
+	{
+		<font color=#009900>int</font> pos = RoboNo + Bank.ROBOT;
+		<font color=#0000FF>if</font> (!isValid(numberHash(pos)) || !isRobot(numberHash(pos))) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		<font color=#0000FF>return</font> ((Account)accounts.get(<font color=#0000FF>new</font> Integer(pos))).getAccuracyReputation();
+	}
+ 	
+	<font color=#0000FF>synchronized</font> <font color=#009900>void</font> newAccuracy(<font color=#009900>int</font> AccountNo,<font color=#009900>int</font> accuracy) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isValid(AccountNo) || !isRobot(AccountNo)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		((Account)accounts.get(<font color=#0000FF>new</font> Integer(AccountNo))).newAccuracy(accuracy);
+	}
+	
+	<font color=#0000FF>synchronized</font> <font color=#009900>void</font> newTime(<font color=#009900>int</font> AccountNo,<font color=#009900>long</font> time) <font color=#0000FF>throws</font> InvalidAccountNoException
+	{
+		<font color=#0000FF>if</font> (!isValid(AccountNo) || !isRobot(AccountNo)) { <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException(); }
+		((Account)accounts.get(<font color=#0000FF>new</font> Integer(AccountNo))).newTime(time);
+	}
+
+    <font color=#0000FF>static</font> <font color=#0000FF>private</font> Date startDate;
+ 	
+    <font color=#0000FF>static</font> 
+    {
+        startDate = <font color=#0000FF>new</font> Date();
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>long</font> getTime() <font color=#0000FF>throws</font> java.rmi.RemoteException 
+    {
+	Date currentDate = <font color=#0000FF>new</font> Date();
+	<font color=#0000FF>return</font> currentDate.getTime() - startDate.getTime();
+    }
+	
+    <font color=#0000FF>static</font> <font color=#0000FF>public</font> <font color=#009900>long</font> s_getTime()
+    {
+	Date currentDate = <font color=#0000FF>new</font> Date();
+	<font color=#0000FF>return</font> currentDate.getTime() - startDate.getTime();
+    }
+	
+}
+
+
+
+</tt>
+</pre>

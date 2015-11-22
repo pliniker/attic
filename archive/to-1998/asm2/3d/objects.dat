@@ -1,0 +1,23 @@
+; object list file
+
+; object1
+World1      dd  00000h      ; X
+            dd  00000h      ; Y
+            dd  00000h      ; Z
+
+Point1      dd  0FF0000h     ; X
+            dd  0FF0000h     ; Y
+            dd  07F0000h     ; Z
+
+Point2      dd  0FF0000h     ; X
+            dd  -0FF0000h     ; Y
+            dd  07F0000h     ; Z
+                 
+Point3      dd  -0FF0000h     ; X
+            dd  0FF0000h     ; Y
+            dd  07F0000h     ; Z
+
+Point4      dd  -0FF0000h     ; X
+            dd  -0FF0000h     ; Y
+            dd  07F0000h     ; Z
+

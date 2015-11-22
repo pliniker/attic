@@ -1,0 +1,33 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * BankTimerTask.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.util.*;
+
+<font color=#0000FF>class</font> BankTimerTask <font color=#0000FF>extends</font> TimerTask
+{
+	<font color=#0000FF>private</font> BankImpl theBank;
+	
+	<font color=#0000FF>public</font> BankTimerTask(BankImpl bank)
+	{
+		<font color=#0000FF>super</font>();
+		theBank=bank;
+	}
+	
+	<font color=#0000FF>public</font> <font color=#009900>void</font> run()
+	{
+		theBank.addInterest();
+	}
+}
+</tt>
+</pre>

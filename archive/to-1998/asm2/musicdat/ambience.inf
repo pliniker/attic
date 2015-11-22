@@ -1,0 +1,14 @@
+
+i0 equ 20000 ; light strings
+i1 equ 10000 ; piano
+i2 equ 0
+i3 equ 0
+i4 equ 0
+i5 equ 0
+i6 equ 0
+i7 equ 2000 ; bass snare
+i8 equ 6000 ; clash
+i9 equ 2000 ; tap
+
+
+include music.dat

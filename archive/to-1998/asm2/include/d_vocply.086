@@ -1,0 +1,78 @@
+
+; last updated: 20-01-96
+
+SBError PROC
+    cmp  ax,0
+    je   NoSBErr   
+    jmp  SKPMSG
+NoSB db 'No Sound Blaster found',13,10,'$'
+WrongPort db 'Wrong port address',13,10,'$'
+WrongIRQ db 'Wrong IRQ number',13,10,'$'
+SKPMSG:
+    cmp  ax,1
+    je   ErrNoSB
+    cmp  ax,2
+    je   ErrWrongPort
+    cmp  ax,3
+    je   ErrWrongIRQ
+ErrNoSb:
+    mov  dx,offset NoSb
+    jmp  OutMsg
+ErrWrongPort:
+    mov  dx,offset WrongPort
+    jmp  OutMsg
+ErrWrongIRQ:
+    mov  dx,offset WrongIRQ
+    jmp  OutMsg
+OutMsg:
+    mov  ah,09h
+    int  21h
+    mov  ah,4Ch
+    int  21h
+NoSBErr:
+    ret
+SBError ENDP
+
+SBInit PROC
+    SetDs @data
+    mov  bx,1
+    mov  ax,220
+    call far ptr DrvBuffer
+
+    mov  bx,2
+    mov  ax,5
+    call far ptr DrvBuffer
+
+    mov  bx,3
+    call far ptr DrvBuffer
+    call SBError
+    
+    mov  bx,4
+    mov  al,1
+    call far ptr DrvBuffer
+
+    mov  bx,5
+    SetReg es,@code
+    mov  di,offset VocStatus
+    call far ptr DrvBuffer
+
+    ret
+SBInit ENDP
+
+VocPlay PROC
+    SetDs @data
+
+    mov  bx,6
+    mov  di,1Ah
+    call far ptr DrvBuffer
+
+    ret
+VocPlay ENDP
+
+SBShutDown PROC
+    mov  bx,9
+    call far ptr DrvBuffer
+    ret
+SBShutDown ENDP
+
+

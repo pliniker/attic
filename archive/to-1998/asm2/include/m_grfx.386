@@ -1,0 +1,130 @@
+
+; last updated: 26-03-97
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+ViewBufferMOV PROC NEAR
+    pusha
+    push ds
+    push es
+assume ds:GBuf2
+    mov  ax,GBuf2
+    mov  ds,ax
+    mov  ax,0A000h
+    mov  es,ax
+    mov  si,offset Buffer
+    mov  di,0
+    mov  cx,64000
+    rep  movsb
+
+    pop  es
+    pop  ds
+    popa
+    ret
+ViewBufferMOV ENDP
+
+Buf1toBuf2 PROC NEAR
+    pusha
+    push ds
+    push es
+assume ds:GBuf1,es:GBuf2
+    mov  ax,GBuf1
+    mov  ds,ax
+    mov  ax,GBuf2
+    mov  es,ax
+    mov  cx,64000
+    mov  di,0
+    mov  si,offset ImageBuffer1[65064]
+CopyLoop:
+    mov  al,ImageBuffer1[si]
+    mov  es:[di],al
+    dec  si
+    inc  di
+    dec  cx
+    jnz  CopyLoop
+    pop  es
+    pop  ds
+    popa
+Buf1toBuf2 ENDP
+
+ViewBufferOR PROC
+assume ds:GBuf1
+    mov  ax,GBuf1
+    mov  ds,ax
+    mov  ax,0A000h
+    mov  gs,ax
+    mov  di,0
+    mov  si,offset ImageBuffer1[65064]
+    mov  cx,64000
+VIEWLOOPOR:
+    mov  al,ImageBuffer1[si]
+    mov  ah,gs:[di]
+    or   al,ah
+    mov  gs:[di],al
+    inc  di
+    dec  si
+    loop VIEWLOOPOR
+    ret
+ViewBufferOR ENDP
+
+ViewBufferXOR PROC
+assume ds:GBuf1
+    mov  ax,GBuf1
+    mov  ds,ax
+    mov  ax,0A000h
+    mov  gs,ax
+    mov  di,0
+    mov  si,offset ImageBuffer1[65064]
+    mov  cx,64000
+VIEWLOOPXOR:
+    mov  al,ImageBuffer1[si]
+    mov  ah,gs:[di]
+    xor  al,ah
+    mov  gs:[di],al
+    inc  di
+    dec  si
+    loop VIEWLOOPXOR
+    ret
+ViewBufferXOR ENDP
+
+ImageLoad PROC NEAR
+assume ds:GBuf1   
+    mov  ax,GBuf1
+    mov  ds,ax
+
+    OpenFile    ImageName1,00h
+    mov  ImageHandle1,ax
+    mov  bx,3
+    call IfError
+    ReadFile    ImageHandle1,ImageBuffer1,ImageLength1
+    mov  bx,3
+    call IfError
+    CloseFile   ImageHandle1
+    mov  bx,3
+    call IfError
+    ret
+ImageLoad ENDP
+
+ClearScreen PROC NEAR
+    mov  ax,0A000h
+    mov  es,ax
+    mov  ax,0
+    mov  di,0
+    mov  cx,64000
+    rep  stosw
+    ret
+ClearScreen ENDP
+
+Code ENDS
+
+GBuf1 SEGMENT PARA 'GBuf1' USE16
+ImageName1      db 'PIC1.BMP',0
+ImageHandle1    dw 0
+ImageLength1    dw 65078
+ImageBuffer1    db 65078 dup(?)
+GBuf1 ENDS
+
+GBuf2 SEGMENT PARA 'GBuf2' USE16
+Buffer db 64000 dup (?)
+GBuf2 ENDS

@@ -1,0 +1,55 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#9A1900>/**
+ * Quote.java
+ *
+ *@author Gus Paul
+ *@date 7/7/2001
+ *
+ *This class represents the object that a robot creates and passes to the server, allowing
+ *the cartographer who offered the job to make a decision on which quote to accept.  
+ *
+ */</font> 
+
+<font color=#0000FF>import</font> uk.ac.ic.doc.ise3.sp.*;
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> Quote <font color=#0000FF>implements</font> java.io.Serializable{
+
+    <font color=#0000FF>private</font> <font color=#009900>int</font> robotID, price, accuracy;
+    <font color=#0000FF>private</font> <font color=#009900>long</font> time;
+    <font color=#0000FF>private</font> Region region;
+    
+    <font color=#0000FF>public</font> Quote(<font color=#009900>int</font> robotID, Region region, <font color=#009900>int</font> price, <font color=#009900>long</font> time, <font color=#009900>int</font> accuracy){
+	<font color=#0000FF>this</font>.robotID = robotID;
+	<font color=#0000FF>this</font>.region= region;
+	<font color=#0000FF>this</font>.price = price;
+	<font color=#0000FF>this</font>.time = time;
+	<font color=#0000FF>this</font>.accuracy = accuracy;
+    } 
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getRobotID(){
+	<font color=#0000FF>return</font> robotID;
+    }
+
+    <font color=#0000FF>public</font> Region getRegion(){
+	<font color=#0000FF>return</font> region;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getPrice(){
+	<font color=#0000FF>return</font> price;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>long</font> getTime(){
+	<font color=#0000FF>return</font> time;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getAccuracy(){
+	<font color=#0000FF>return</font> accuracy;
+    }
+
+}
+
+</tt>
+</pre>

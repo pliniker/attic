@@ -1,0 +1,454 @@
+;
+; Note offsets into NoteTable
+C1  equ 0
+Cs1 equ 4
+D1  equ 8 
+Ds1 equ 12
+E1  equ 16
+F1  equ 20
+Fs1 equ 24
+G1  equ 28
+Gs1 equ 32
+A1  equ 36
+As1 equ 40
+B1  equ 44
+C2  equ 48
+Cs2 equ 52
+D2  equ 56
+Ds2 equ 60
+E2  equ 64
+F2  equ 68
+Fs2 equ 72
+G2  equ 76
+Gs2 equ 80
+A2  equ 84
+As2 equ 88
+B2  equ 92
+C3  equ 96
+Cs3 equ 100
+D3  equ 104
+Ds3 equ 108
+E3  equ 112
+F3  equ 116
+Fs3 equ 120
+G3  equ 124
+Gs3 equ 128
+A3  equ 132
+As3 equ 136
+B3  equ 140
+C4  equ 144
+_   equ 0FEh
+endsong equ 0FFh
+;
+;***************************************************************************
+;                           NOTE SEGMENT
+;***************************************************************************
+NoteData    SEGMENT WORD 'SMPS' USE32
+INCLUDE music.dat
+NoteData    ENDS
+;
+;***************************************************************************
+;                           MUSIC SEGMENT
+;***************************************************************************
+MusicSeg   SEGMENT WORD 'SMPS' USE32
+;
+; file related vars
+SName           db 'sample_.raw',0
+SHandle         dw 0
+;
+; table of note increments
+NoteTable       dd  08000h, 0879Ch, 08FACh, 09837h
+                dd  0A145h, 0AADCh, 0B505h, 0BF86h
+                dd  0CB2Fh, 0D744h, 0E411h, 0F1A1h
+                dd  10000h, 10F38h, 11F59h, 13070h
+                dd  1428Ah, 155B8h, 16A09h, 17F91h
+                dd  1965Fh, 1AE89h, 1C824h, 1E343h
+                dd  20000h, 21E72h, 23EB3h, 260DFh
+                dd  28514h, 2AB70h, 2D413h, 2FF21h
+                dd  32CBFh, 35D14h, 39047h, 3C686h
+                dd  40000h
+;
+; individual sample data
+SOffsets        dd 0*65536,1*65536,2*65536,3*65536,4*65536
+                dd 5*65536,6*65536,7*65536,8*65536,9*65536
+                dd 10*65536,11*65536,12*65536,13*64436,14*65536
+                dd 15*65536
+;
+; temporary sample buffer
+SData           db 64000 dup(?)
+;
+; channel & note data
+_CurrentChannel dw ?
+_C_Notes        db 16 dup(?)
+_C_Volumes      db 16 dup(?)
+_C_Instrs       db 16 dup(?)
+_C_Pos          dw 16 dup(?)
+;
+_Note           dd ?
+_Instr          dd ?
+_Volume         db ?
+_music_pos      dw ?
+_mixer_pos      dd ?
+_current_mixer  db ?
+;
+_mixerlength    dw ?
+_notelength     dw ?
+_speed          dw ?
+;
+; double buffering mixers
+_Mixer1         db 65535 dup(?)
+_Mixer2         db 65535 dup(?)
+;
+; permanent sample buffer
+; 1Meg + 64k to clear the maximum memory area used by DOS
+SampleOffset       equ (1024*1024) +65536
+;
+MusicSeg    ENDS
+;
+;***************************************************************************
+;                           CODE SEGMENT
+;***************************************************************************
+.386
+Code        SEGMENT WORD 'CODE' USE16 PUBLIC
+    ASSUME cs:Code
+
+Initialize PROC NEAR
+    assume ds:MusicSeg
+    mov  ax,MusicSeg
+    mov  ds,ax
+    mov  _current_mixer,-1
+    mov  _music_pos,offset MusicData
+    mov  _speed,020h
+    mov  _mixerlength,0FFFFh
+    mov  ax,_mixerlength
+    xor  dx,dx
+    div  _speed
+    mov  _notelength,ax
+    sub  _mixerlength,dx
+    mov  _mixer_pos,0
+    ret
+Initialize ENDP
+;
+; ***************************************************************************
+; playing procedures
+;
+; play the mixer not being written to 
+PlayMixer PROC NEAR
+    ASSUME ds:MusicSeg
+    mov  ax,MusicSeg
+    mov  ds,ax
+;
+    xor  eax,eax
+    xor  edx,edx
+;                   
+    mov  al,5h     
+    out  0Ah,al
+    mov  al,0
+    out  0Ch,al
+    mov  al,49h
+    out  0Bh,al
+;
+    cmp  _current_mixer,-1
+    je   PlayMixer2
+    mov  ax,seg _mixer1
+    shl  eax,4
+    add  eax,offset _Mixer1
+    jmp  PlayMixer1
+PlayMixer2:
+    mov  ax,seg _mixer2
+    shl  eax,4
+    add  eax,offset _Mixer2
+PlayMixer1:
+;
+    out  02h,al
+    shr  eax,8
+    out  02h,al
+    shr  eax,8
+    out  83h,al
+    shr  eax,8
+    mov  dx,483h
+    out  dx,al
+;
+    mov  ax,_mixerlength
+    out  03h,al
+    shr  ax,8
+    out  03h,al
+;
+    DSPWrite 40h
+    DSPWrite samplerate
+;
+    DSPWrite 14h
+    mov  bx,_mixerlength
+    sub  bl,1
+    sub  bh,1
+    DSPWrite bl
+    DSPWrite bh
+;
+    mov  al,1
+    out  0Ah,al
+;
+    ret
+PlayMixer ENDP
+
+; clear the mixer to be used
+Clear_Mixer PROC NEAR
+    ASSUME es:MusicSeg
+    mov  ax,MusicSeg
+    mov  es,ax
+    mov  ds,ax
+;    
+    cmp  _current_mixer,-1
+    je   ClearMixer1
+    mov  edi,offset _Mixer2
+    jmp  ClearMixer2
+ClearMixer1:
+    mov  edi,offset _Mixer1
+ClearMixer2:
+    mov  cx,_mixerlength
+    mov  ax,0
+ClearMixer:
+    mov  [edi],al
+    inc  edi
+    dec  cx
+    jnz  ClearMixer
+    ret
+Clear_Mixer ENDP
+;
+; ***************************************************************************
+; mixing procedures
+;
+; get the next note from MusicData
+Get_Next_Notes PROC NEAR
+    ASSUME es:NoteData,ds:MusicSeg
+    mov  ax,NoteData
+    mov  es,ax
+    xor  ebx,ebx
+    mov  si,_music_pos
+    mov  bx,channels
+;
+    Note_loop:
+;
+        mov  al,es:[si]
+        cmp  al,endsong
+        je   RestartSong
+        cmp  al,_
+        je   KeepOldNote
+        mov  _C_Notes[ebx],al
+        inc  si
+;
+        mov  al,es:[si]
+        mov  _C_Instrs[ebx],al
+        inc  si
+        jmp  ToVolume
+;
+        KeepOldNote:
+        add  si,2
+;
+        ToVolume:
+        mov  al,es:[si]
+        cmp  al,-1
+        je   KeepOldVolume
+        mov  _C_Volumes[ebx],al
+        KeepOldVolume:
+        inc  si
+;
+        dec  ebx
+        jnz  Note_Loop
+;
+    add  _music_pos,(channels+1)*3
+    ret
+RestartSong:
+    mov  _music_pos,offset MusicData
+    ret
+Get_Next_Notes ENDP
+;
+; get a single note to mix
+Get_Note PROC NEAR
+    xor  ebx,ebx
+    mov  bx,_CurrentChannel
+;
+    xor  ax,ax
+    mov  al,_C_Notes[ebx]
+    xor  esi,esi
+    mov  si,ax
+    mov  edx,NoteTable[esi]
+    mov  _Note,edx
+;
+    xor  eax,eax
+    mov  al,_C_Instrs[ebx]
+    mov  si,ax
+    shl  si,2
+    mov  edx,SOffsets[esi]
+    add  edx,SampleOffset
+    shl  ebx,1
+    mov  ax,_C_Pos[ebx]
+    add  edx,eax
+    mov  _Instr,edx
+;
+    xor  ax,ax
+    shr  ebx,1
+    mov  al,_C_Volumes[ebx]
+    mov  _Volume,al
+    ret
+Get_Note ENDP
+;
+; mix a sample into the curren mixer
+Mix_Sample PROC NEAR
+    cmp  _current_mixer,-1
+    je   WriteMixer1
+    mov  esi,offset _Mixer2
+    jmp  WriteMixer2
+WriteMixer1:
+    mov  esi,offset _Mixer1   
+WriteMixer2:
+    add  esi,_mixer_pos
+    xor  ebx,ebx
+    mov  bx,_notelength
+    add  ebx,esi
+;
+    mov  ecx,_note
+    mov  edi,_instr
+    xor  edx,edx
+;
+    WriteLoop:
+        xor  ax,ax
+        mov  al,[edi]
+        mul  _volume
+        shr  ax,6
+        mov  ah,[esi]
+        add  al,ah
+        mov  [esi],al
+;        
+        add  edx,ecx
+        mov  eax,edx
+        shr  eax,16
+        mov  edi,eax
+        add  edi,_instr
+;
+        inc  esi
+        cmp  esi,ebx
+        jne  WriteLoop
+;        
+    ret
+Mix_Sample ENDP
+;
+; ***************************************************************************
+; instrument loading
+;
+ClearSampleData PROC NEAR
+    ASSUME ds:MusicSeg
+    mov  ax,MusicSeg
+    mov  ds,ax
+    mov  ecx,16*65536
+ClearLoop:
+    mov  edi,ecx
+    add  edi,SampleOffset
+    mov  al,0
+    mov  [edi],al
+    dec  ecx
+    jnz  ClearLoop
+    ret
+ClearSampleData ENDP
+;
+ClearSData PROC NEAR
+    mov  cx,65535
+    mov  al,0
+    ClearSLoop:
+    mov  di,cx
+    mov  SData[di],al
+    dec  cx
+    jnz  ClearSLoop
+    ret
+ClearSData ENDP
+;
+LoadSample MACRO segment,ofs,len
+local IFNOTEXISTS
+    push ds
+    ASSUME ds:segment
+    mov  ax,segment
+    mov  ds,ax
+    OpenFile    SName,00h
+    jc   IFNOTEXISTS
+    mov  SHandle,ax
+    ReadFile    SHandle,[ofs],len
+    CloseFile   SHandle
+IFNOTEXISTS:
+    pop  ds
+    ENDM    
+;
+NewInstr MACRO num
+    push ds
+    SetDs MusicSeg
+    mov  al,num
+    mov  SName[6],al
+    pop  ds
+    ENDM
+;
+; load a single instrument
+LoadInstr MACRO ofs,len
+; load the sample
+    LoadSample MusicSeg,SData,len
+; copy the sample data to real mem
+    mov  dx,offset SData        
+    mov  ebx,offset [ofs+SampleOffset]
+    CopyBlock_DOS_to_RMEM MusicSeg,dx, MusicSeg,ebx, len
+    ENDM
+;
+; load all the instruments
+LoadInstruments PROC NEAR
+    call ClearSampleData
+    call  ClearSData
+    NewInstr '0'
+    LoadInstr 0*65536,64000
+    call  ClearSData
+    NewInstr '1'
+    LoadInstr 1*65536,64000
+    call  ClearSData
+    NewInstr '2'
+    LoadInstr 2*65536,64000
+    call  ClearSData
+    NewInstr '3'
+    LoadInstr 3*65536,64000
+    call  ClearSData
+    NewInstr '4'
+    LoadInstr 4*65536,64000
+    call  ClearSData
+    NewInstr '5'
+    LoadInstr 5*65536,64000
+    call  ClearSData
+    NewInstr '6'
+    LoadInstr 6*65536,64000
+    call  ClearSData
+    NewInstr '7'
+    LoadInstr 7*65536,64000
+    call  ClearSData
+    NewInstr '8'
+    LoadInstr 8*65536,64000
+    call  ClearSData
+    NewInstr '9'
+    LoadInstr 9*65536,64000
+    call  ClearSData
+    NewInstr 'A'
+    LoadInstr 10*65536,64000
+    call  ClearSData
+    NewInstr 'B'
+    LoadInstr 11*65536,64000
+    call  ClearSData
+    NewInstr 'C'
+    LoadInstr 12*65536,64000
+    call  ClearSData
+    NewInstr 'D'
+    LoadInstr 13*65536,64000
+    call  ClearSData
+    NewInstr 'E'
+    LoadInstr 14*65536,64000
+    call  ClearSData
+    NewInstr 'F'
+    LoadInstr 15*65536,64000
+    ret
+LoadInstruments ENDP
+;
+; ***************************************************************************
+;
+Code ENDS
+;

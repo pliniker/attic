@@ -1,0 +1,111 @@
+%out * * * Sound Blaster * * *
+
+; the DSP
+
+Code SEGMENT WORD 'CODE' USE16 PUBLIC
+    ASSUME cs:Code
+
+SBReset PROC NEAR
+    mov  dx,226h
+    mov  al,1
+    out  dx,al
+    mov  dx,226h
+    mov  al,0
+    out  dx,al
+    mov  cx,0
+    mov  al,0
+ResetLoop:
+    mov  dx,22Eh
+    in   al,dx
+    mov  dx,22Ah
+    in   al,dx
+    inc  cx
+    cmp  cx,0100
+    je   ExitResetLoop
+    cmp  al,0AAh
+    jne  ResetLoop
+ExitResetLoop:
+    ret
+SBReset ENDP
+
+
+DSPWrite MACRO data
+local DSPLoop
+    mov  dx,22Ch
+DSPLoop:
+    in   al,dx
+    cmp  al,128
+    jae  DSPLoop
+    mov  al,data
+    out  dx,al
+    ENDM
+
+SpeakerON PROC NEAR
+    DSPWrite 0D1h
+    ret
+SpeakerON ENDP
+
+SpeakerOff PROC NEAR
+    DSPWrite 0D3h
+    ret
+SpeakerOff ENDP
+
+PlaySample PROC NEAR
+
+    mov  al,5h
+    out  0Ah,al
+    mov  al,0
+    out  0Ch,al
+    mov  al,49h
+    out  0Bh,al
+
+    mov  ax,seg InstrData
+    shl  eax,4
+    add  ax,offset InstrData
+    out  02h,al
+    shr  eax,8
+    out  02h,al
+    shr  eax,8
+    out  83h,al
+    shr  eax,8
+    mov  dx,483h
+    out  dx,al
+
+    mov  ax,60000
+    out  03h,al
+    shr  ax,8
+    out  03h,al
+
+    DSPWrite 40h
+    DSPWrite 166
+
+    DSPWrite 14h
+    mov  bx,60000
+    sub  bl,1
+    sub  bh,1
+    DSPWrite bl
+    DSPWrite bh
+
+    mov  al,1
+    out  0Ah,al
+
+    ret
+    ENDP
+
+; the Mixer chip
+
+MIXWrite MACRO reg,data
+    mov  al,reg
+    mov  dx,224h
+    out  dx,al
+    mov  al,data
+    inc  dx
+    out  dx,al
+    ENDM
+
+SetVolume MACRO vol
+    MIXWrite 48,vol
+    MIXWrite 49,vol
+    ENDM
+
+Code ENDS

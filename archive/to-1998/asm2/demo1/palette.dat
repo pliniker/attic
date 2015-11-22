@@ -1,0 +1,28 @@
+; New palette list
+PALETTELIST LABEL BYTE
+
+x=0
+REPT 64
+db 0,0,x
+x=x+1
+ENDM
+
+x=0
+REPT 64
+db 0,0,63-x
+x=x+1
+ENDM
+
+x=0
+REPT 64
+db x,x,0
+x=x+1
+ENDM
+
+x=0 
+REPT 64
+db 63-x,63-x,0
+x=x+1
+ENDM
+
+

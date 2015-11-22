@@ -1,0 +1,104 @@
+; module player segment
+
+C1  equ 0
+Cs1 equ 4
+D1  equ 8 
+Ds1 equ 12
+E1  equ 16
+F1  equ 20
+Fs1 equ 24
+G1  equ 28
+Gs1 equ 32
+A1  equ 36
+As1 equ 40
+B1  equ 44
+C2  equ 48
+Cs2 equ 52
+D2  equ 56
+Ds2 equ 60
+E2  equ 64
+F2  equ 68
+Fs2 equ 72
+G2  equ 76
+Gs2 equ 80
+A2  equ 84
+As2 equ 88
+B2  equ 92
+C3  equ 96
+Cs3 equ 100
+D3  equ 104
+Ds3 equ 108
+E3  equ 112
+F3  equ 116
+Fs3 equ 120
+G3  equ 124
+Gs3 equ 128
+A3  equ 132
+As3 equ 136
+B3  equ 140
+C4  equ 144
+_   equ 0FEh
+endsong equ 0FFh
+
+MusicDat SEGMENT PARA 'MUSIC' USE16
+        ASSUME  es:MusicDat
+INCLUDE music.dat
+MusicDat ENDS
+
+
+MusicSeg SEGMENT PARA 'MUSIC' USE16
+        ASSUME  ds:MusicSeg
+
+IName           db 'SAMPLE0.RAW',0
+IHandle         dw 0
+
+NoteTable   dd  08000h, 0879Ch, 08FACh, 09837h
+            dd  0A145h, 0AADCh, 0B505h, 0BF86h
+            dd  0CB2Fh, 0D744h, 0E411h, 0F1A1h
+
+            dd  10000h, 10F38h, 11F59h, 13070h
+            dd  1428Ah, 155B8h, 16A09h, 17F91h
+            dd  1965Fh, 1AE89h, 1C824h, 1E343h
+
+            dd  20000h, 21E72h, 23EB3h, 260DFh
+            dd  28514h, 2AB70h, 2D413h, 2FF21h
+            dd  32CBFh, 35D14h, 39047h, 3C686h
+
+            dd  40000h
+
+_samplelength   dw i0-10, i1-10, i2-10, i3-10, i4-10, i5-10, i6-10, i7-10
+                dw i8-10, i9-10
+_sampleoffsets  dw 0, i0, i0+i1, i0+i1+i2, i0+i1+i2+i3, i0+i1+i2+i3+i4
+                dw i0+i1+i2+i3+i4+i5, i0+i1+i2+i3+i4+i5+i6,  i0+i1+i2+i3+i4+i5+i6+i7
+                dw i0+i1+i2+i3+i4+i5+i6+i7+i8,  i0+i1+i2+i3+i4+i5+i6+i7+i8+i9
+
+_note1          db 0
+_sample1        dw 0
+_volume1        db 0
+_smpofs1        dw 0
+_note2          db 0
+_sample2        dw 0
+_volume2        db 0
+_smpofs2        dw 0
+_note3          db 0
+_sample3        dw 0
+_volume3        db 0
+_smpofs3        dw 0
+_note4          db 0
+_sample4        dw 0
+_volume4        db 0
+_smpofs4        dw 0
+        
+_smplen         dw 0
+_muspos         dw offset MusicData
+_mixpos         dw 0
+_currentmixer   db -2
+_counter        dw 0
+_notecounter    dd 0
+
+Mixer1          db _mixerlength dup(?)
+Mixer2          db _mixerlength dup(?)
+InstrData       db i0+i1+i2+i3+i4+i5+i6+i7+i8+i9 dup(?)
+
+MusicSeg ENDS
+

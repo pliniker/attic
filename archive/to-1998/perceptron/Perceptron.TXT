@@ -1,0 +1,65 @@
+
+Perceptron Neural Network Simulation
+===================================================
+Simple Artificial Neural Network
+
+This program is one of the simplest early neural networks
+called a perceptron initially designed to be a  computational
+model of the retina. The network gives a binary output of
+one if the image is recogneised otherwise output is zero.
+
+There are three basic layers of neurons in this model -
+    A: associative and R: responsive and a buffer layer.
+The A units use a linear activation function and pass outputs
+to the R units by trainable weights. The output from an R
+unit is 0 if the weighted sum inputs are equal or less than 0
+and 1 if they are greater than 0.
+
+The learning algorithm is supervised, the weights are adjusted
+to reduce the error whenever the network produces an output which
+does not match a known training set.
+Under certain conditions this networks weights should always
+converge (find a set of weights to match all training sets).
+
+Activation functions:
+=====================
+Responsive:
+If (output = 1 & should be 1) or (output = 0 & should be 0)
+    then do nothing
+If (output = 0 & should be 1) then increment weight values
+If (output = 1 & should be 0) then decrement weight values
+
+net = äxw
+
+out = f(net) = 1 if net > 0 or 0 otherwise
+
+Associative:
+any linear function
+
+Learning Rules:
+===============
+Wnew = Wold + deltaW
+deltaW = a * x * (t - y)  =  a * error * input
+therefore:
+new if out = 0 & should be 1 -> old + (a * x)
+new if out = 1 & should be 0 -> old - (a * x)
+new if out is correct        -> old
+
+where:
+a > 0 = the learning rate coefficient
+x = the input
+t = desired target output
+y = actual output computed previously
+
+net = äxw
+
+out = f(net) = some linear function
+
+* * * *
+
+The program that I have written is in plain C, no C++ so it should
+be compilable by any C compiler. It does not use any floating point
+arithmetic - all calculations are done in integer arithmetic - so
+no co-processor is required. 
+                                                                        
+* * * *

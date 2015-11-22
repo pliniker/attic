@@ -1,0 +1,254 @@
+; the Mixer chip
+
+MIXWrite MACRO reg,data
+    mov  al,reg
+    mov  dx,224h
+    out  dx,al
+    mov  al,data
+    inc  dx
+    out  dx,al
+    ENDM
+
+MIXRead  MACRO reg,data
+    mov  al,reg
+    mov  dx,224h
+    out  dx,al
+    inc  dx
+    in   al,dx
+    mov  data,al
+    ENDM
+
+SetVolume MACRO vol
+    MIXWrite 48,vol
+    MIXWrite 49,vol
+    ENDM
+
+GetVolume MACRO vol
+    MIXWrite 48,vol
+    MIXWrite 49,vol
+    ENDM
+Code        SEGMENT WORD 'CODE' USE16 PUBLIC
+    ASSUME cs:Code
+
+Slength             dw 0
+SRate               db 0
+SampleSegm          dw 0
+SampleOfs           dw 0
+NewHandlerSeg       dw 0
+NewHandlerOfs       dw 0
+OldHandlerSeg       dw 0
+OldHandlerOfs       dw 0
+IRQtable            db 2h,3h,5h,7h,10h, 0FFh
+IRQindex            dw 0
+testIRQ             db 0
+SB_IRQ              db 0DDh
+port21              dw 0
+irqmask             db 0
+
+DSPWrite MACRO data
+local DSPLoop
+    mov  dx,22Ch
+DSPLoop:
+    in   al,dx
+    cmp  al,128
+    jae  DSPLoop
+    mov  al,data
+    out  dx,al
+    ENDM
+
+; reset the SB card
+SBReset PROC NEAR
+    mov  dx,226h
+    mov  al,1
+    out  dx,al
+    mov  dx,226h
+    mov  al,0
+    out  dx,al
+    mov  cx,0
+    mov  al,0
+ResetLoop:
+    mov  dx,22Eh
+    in   al,dx
+    mov  dx,22Ah
+    in   al,dx
+    inc  cx
+    cmp  cx,0100
+    je   ExitResetLoop
+    cmp  al,0AAh
+    jne  ResetLoop
+ExitResetLoop:
+    ret
+SBReset ENDP
+
+; play a sample
+PlaySample PROC NEAR
+    push ds
+    ASSUME ds:Code
+    mov  ax,Code
+    mov  ds,ax
+
+    mov  al,5h
+    out  0Ah,al
+    mov  al,0
+    out  0Ch,al
+    mov  al,49h
+    out  0Bh,al
+
+    mov  ax,SampleSegm
+    shl  eax,4
+    add  ax,SampleOfs
+    out  02h,al
+    shr  eax,8
+    out  02h,al
+    shr  eax,8
+    out  83h,al
+    shr  eax,8
+    mov  dx,483h
+    out  dx,al
+
+    mov  ax,Slength
+    out  03h,al
+    shr  ax,8
+    out  03h,al
+
+    DSPWrite 40h
+    DSPWrite SRate
+
+    DSPWrite 14h
+    mov  bx,Slength
+    sub  bl,1
+    sub  bh,1
+    DSPWrite bl
+    DSPWrite bh
+
+    mov  al,1
+    out  0Ah,al
+
+    pop  ds
+    ret
+    ENDP
+
+
+; test irqhandle
+IRQHandler PROC FAR
+    pusha
+    ASSUME ds:Code
+    mov  ax,Code
+    mov  ds,ax
+
+    mov  al,testIRQ
+    mov  SB_IRQ,al
+
+    mov  al,20h
+    out  20h,al
+    popa
+    iret
+IRQHandler ENDP
+
+; autodetect the SB irq
+DetectIRQ PROC NEAR
+        ASSUME ds:Code
+        mov  ax,Code
+        mov  ds,ax
+
+        SetVolume 0
+
+        DSPWrite 0D3h
+        mov  Slength,1000
+        mov  SRate,166
+        mov  SampleSegm,seg SLength
+        mov  SampleOfs,offset SLength
+        in   ax,21h
+        mov  port21,ax
+
+        DetectLoop:
+            mov  bx,IRQindex
+            mov  cl,IRQtable[bx]
+            mov  testIRQ,cl
+            add  testIRQ,08h
+            mov  irqmask,1
+            shl  irqmask,cl
+
+            GetIntVec testIRQ,OldHandlerSeg,OldHandlerOfs
+            mov  NewHandlerOfs,offset IRQHandler
+            mov  NewhandlerSeg,seg IRQHandler
+            SetIntVec testIRQ,NewHandlerSeg,NewHandlerOfs
+
+            mov  bl,irqmask
+            not  bl
+            in   al,21h
+            and  al,bl
+            out  21h,al
+
+            call PlaySample
+
+            Delay 0FFFFFh
+
+            mov  bl,IRQmask
+            in   al,21h
+            or   al,bl
+            out  21h,al
+ 
+            mov  dx,22Eh
+            in   al,dx
+
+            mov  al,20h
+            out  20h,al
+
+            SetIntVec testIRQ,OldHandlerSeg,OldHandlerOfs
+            mov  al,SB_IRQ
+            cmp  al,testIRQ
+            je   ExitDetection
+            inc  IRQindex
+            cmp  IRQindex,5
+            jne  DetectLoop
+
+    ExitDetection:
+    SetVolume 11000000b
+    DSPWrite 0D1h
+    mov  ax,port21
+    out  21h,ax
+    ret
+DetectIRQ ENDP
+
+SetIRQHandler MACRO handler
+    ASSUME ds:Code
+    mov  ax,Code
+    mov  ds,ax
+
+    mov  cl,SB_IRQ
+    sub  cl,8
+    mov  bl,1
+    shl  bl,cl
+    not  bl
+    in   al,21h
+    and  al,bl
+    out  21h,al
+
+    mov  NewHandlerSeg,seg handler
+    mov  NewHandlerOfs,offset handler
+
+    GetIntVec SB_IRQ,OldHandlerSeg,OldHandlerOfs
+    SetIntVec SB_IRQ,NewHandlerSeg,NewHandlerOfs
+    ENDM
+
+IRQHandlerOFF PROC NEAR
+    ASSUME ds:COde
+    mov  ax,Code
+    mov  ds,ax
+    SetIntVec SB_IRQ,OldHandlerSeg,OldHandlerOfs
+
+    mov  cl,SB_IRQ
+    sub  cl,8
+    mov  al,1
+    shl  al,cl
+    in   al,21h
+    or   al,bl
+    out  21h,al
+ 
+    mov  dx,22Eh
+    in   al,dx
+    ret
+IRQHandlerOFF ENDP
+
+Code ENDS

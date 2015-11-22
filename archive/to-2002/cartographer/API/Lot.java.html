@@ -1,0 +1,79 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#9A1900>/**
+ * Lot.java
+ *
+ *@author Gus Paul
+ *@date 20/6/2001
+ *
+ *This class represents the object that the server creates and passes to the cartographers, after a 
+ *region has been submitted for auction, allowing the cartographers to make a decision on what to bid
+ *for an object.  
+ *
+ *This object is saved on the server after the auction, and the various get Lot methods will return an 
+ *object like this with all the bid variables filled after the auction takes place.  This is so you can
+ *base your strategy on what other people are doing.
+ *
+ *
+ *
+ */</font> 
+
+<font color=#0000FF>import</font> java.util.Vector;
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> Lot <font color=#0000FF>implements</font> java.io.Serializable {
+
+    <font color=#0000FF>private</font> Region region;
+    <font color=#0000FF>private</font> <font color=#009900>int</font> lotNo;
+    <font color=#0000FF>private</font> <font color=#009900>int</font> accuracy, reserve;
+    <font color=#0000FF>private</font> Vector bids = <font color=#0000FF>new</font> Vector();
+
+    <font color=#0000FF>public</font> Lot(Region region, <font color=#009900>int</font> no, <font color=#009900>int</font> accuracy){
+	<font color=#0000FF>this</font>.region = region;	 
+	lotNo = no;
+	<font color=#0000FF>this</font>.accuracy = accuracy;
+	<font color=#0000FF>this</font>.reserve = <font color=#CC33CC>0</font>;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getLotNo(){
+	<font color=#0000FF>return</font> lotNo;
+    }
+    
+    <font color=#0000FF>public</font> Region getRegion(){
+	<font color=#0000FF>return</font> region;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getAccuracy(){
+	<font color=#0000FF>return</font> accuracy;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getReserve(){
+	<font color=#9A1900>//will only not be 0 AFTER auction
+</font>	<font color=#0000FF>return</font> reserve;
+    }
+    
+    <font color=#0000FF>public</font> Bid getBid(<font color=#009900>int</font> n) <font color=#0000FF>throws</font> Exception{
+	<font color=#0000FF>return</font> (Bid)bids.elementAt(n);
+    }
+
+    <font color=#0000FF>public</font> Vector getAllBids(){
+	<font color=#0000FF>return</font> bids;
+    }
+
+    <font color=#009900>void</font> setBid(Bid bid){
+	bids.addElement(bid);
+    }
+  
+    <font color=#009900>void</font> setReserve(<font color=#009900>int</font> amount){
+	reserve = amount;
+    }
+    
+    <font color=#009900>void</font> setRegion(Region r){
+	region = r;
+    }
+
+}
+
+</tt>
+</pre>

@@ -1,0 +1,85 @@
+{\rtf1\mac\ansicpg10000\cocoartf102
+{\fonttbl\f0\fswiss\fcharset77 Helvetica;\f1\fswiss\fcharset77 Helvetica-Bold;\f2\fmodern\fcharset77 Courier;
+}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11600\viewh10960\viewkind0
+\pard\tx565\tx1133\tx1700\tx2266\tx2832\tx3401\tx3967\tx4535\tx5102\tx5669\tx6235\tx6802\ql\qnatural
+
+\f0\fs24 \cf0 \
+
+\f1\b\fs36 Configuring and installing:\
+
+\f0\b0\fs24 \
+
+\f1\b\fs28 Requirements:
+\f0\b0\fs24 \
+\
+Built & tested on Linux or OS X\
+\
+
+\f1\b Building\
+
+\f0\b0 	qmake from Trolltech Qt\
+\
+
+\f1\b Cross-platform User Interface\
+
+\f0\b0 	Trolltech Qt: tested with 3.3.4\
+	OpenGL\
+\
+
+\f1\b Python Scripting\
+
+\f0\b0 	Python 2.3\
+	boost::python 1.32\
+The Python scripting plugin has only been tested with Python 2.3 and boost 1.32. Different versions will likely require source and build config changes.\
+\
+
+\f1\b Other requirements\
+
+\f0\b0 	libxml2\
+\
+
+\f1\b\fs28 Building:
+\f0\b0\fs24 \
+
+\f1\b \
+1: For debug:
+\f0\b0 \
+from source tree root execute\
+\
+
+\f2 	qmake PREFIX=/usr/local/thebrain CONFIG+=debug\
+	make\
+
+\f1\b \
+2: For release:\
+
+\f2\b0 \
+	qmake PREFIX=/usr/local/thebrain\
+	make\
+
+\f1\b \
+3: Edit environment:\
+
+\f0\b0 For example, set the following in 
+\f2 $HOME/.profile
+\f0 :\
+\
+
+\f2 	export THEBRAIN="/usr/local/thebrain"\
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$THEBRAIN/lib:$THEBRAIN/plugins"\
+	export PYTHONPATH="$PYTHONPATH:$THEBRAIN/python"
+\f0 \
+\
+on OS X change 
+\f2 LD_LIBRARY_PATH
+\f0  to 
+\f2 DYLD_LIBRARY_PATH
+\f0  and see\
+
+\f2 http://developer.apple.com/qa/qa2001/qa1067.html
+\f0 \
+
+\f1\b \
+}

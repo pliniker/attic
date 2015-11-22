@@ -1,0 +1,339 @@
+;
+; last updated: 03-04-97
+;
+.386P
+;
+;                   My own incomplete DPMI - sort of.
+;                   It doesn't always work unfortunately.
+;
+;
+;   How to use X_DPMI.386
+;   =====================
+;   1:  call  SetupGDT          setup the global descriptor table with various preset values
+;   2:  call  LoadGDTR          load the global descriptor table register with the address of the table
+;   3:  call  SetupIDT          point all interrupt vectors to IntHandler initially
+;   4:  call  LoadIDTR          load the interrupt descriptor table register with the address of the table
+;   5:  call  PMODE             enter protected mode
+;   6:  call  SetSelect         set the selectors to preset values
+;   7:  ** your routines **     do (almost) everything you want
+;   8:  call  RMODE             return to real mode
+;   9:  call  ResetDTRs         reset the descriptor table registers to their values before switching to pmode
+;   10: call  Terminate         end the program via dos function call
+;
+;   Preset Global Descriptor Pointers
+;   =================================
+thisseg = 1*8                   ; descriptor for : pmode codeseg
+videoseg = 2*8                  ;                  video - 0A000h 
+gdtrseg = 3*8                   ;                  gdt seg 
+idtrseg = 4*8                   ;                  idt seg
+stackseg = 5*8                  ;                  ss (stack segment)
+textseg = 6*8                   ;                  text - 0B800h
+tempseg = 7*8                   ;                  temporary dat seg
+;
+;   Other Constants
+;   ===============
+e equ db 66h                    ; 32 bit instruction prefix
+gdtlen = 65                     ; gdt length - number of descriptors
+idtlen = 256                    ; idt length - number of interrupts
+TypeCode = 10010010b            ; access rights :  code segments
+TypeData = 10010010b            ;                  data segments
+TypeSys  = 10010010b            ;                  system segments
+;   
+; segment containing global descriptor table
+;
+GDTseg  SEGMENT 'DESC' USE16 PUBLIC
+; pointer to GDT
+GDTptr  dw gdtlen*8,?,?
+GDTold  dw ?,?,?
+;
+GDT     LABEL   BYTE
+        dw 0,0,0,0              ; dummy descriptor set to null
+REPT gdtlen
+        dw  0                   ; seg length 1
+        db  0,0,0               ; seg address 1
+        db  0                   ; flags & access rights
+        db  11000000b           ; further flags & seg length
+        db  0                   ; seg address 2
+ENDM
+;
+GDTseg  ENDS
+;
+; segment containing interrupt descriptor table
+;
+IDTseg  SEGMENT 'DESC' USE16 PUBLIC
+;
+IDTptr  dw idtlen*6,?,?
+IDTold  dw ?,?,?
+;
+IDT     LABEL   DWORD
+REPT idtlen
+        dw ?                    ; selector
+        dd ?                    ; offset
+ENDM
+;
+IDTseg  ENDS
+;
+; the code segment
+; 
+Code    SEGMENT 'CODE' USE16 PUBLIC
+        ASSUME  cs:Code,ds:Code
+;
+; set a segment register to a selector
+;
+SetSeg MACRO segment,name,sel
+assume segment:name
+    mov  ax,sel
+    mov  segment,ax
+    ENDM
+;
+; set reg to selector
+;
+SetReg MACRO segment,sel
+    mov  ax,sel
+    mov  segment,ax
+    ENDM
+;
+; temporary interrupt handler
+;
+IntHandler PROC FAR
+    call RMODE                  ; back to real mode
+    call ResetDTRs              ; reset descriptor table registers
+    mov  ax,Code
+    mov  ds,ax
+    mov  dx,offset IntMsg
+    mov  ah,9
+    int  21h
+    mov  ax,4C00h               ; end the program
+    int  21h
+IntMsg db 'An undefined interrupt was generated while in protected mode.',13,10
+        db 'Your program has been terminated.',13,10,'$'
+IntHandler ENDP
+;
+; temporary error handler
+;
+ErrorHandler PROC NEAR
+    call RMODE                  ; back to real mode
+    call ResetDTRs              ; reset descriptor table registers
+    mov  ax,Code
+    mov  ds,ax
+    mov  dx,offset ErrorMsg
+    mov  ah,9
+    int  21h
+    mov  ax,4C00h               ; end the program
+    int  21h
+ErrorMsg db 'An error occurred while in protected mode.',13,10
+        db 'Your program has been terminated.',13,10,'$'
+ErrorHandler ENDP
+;
+; switch to protected mode
+;
+PMODE PROC NEAR
+    cli
+    mov  eax,cr0
+    or   eax,1
+    mov  cr0,eax
+    jmp  JPMode
+    JPMode:
+    ret
+PMODE ENDP
+;
+; switch to real mode
+;
+RMODE PROC NEAR
+    mov  eax,cr0
+    and  al,0FEh
+    mov  cr0,eax
+    jmp  JRMode
+    JRMode:
+    sti
+    ret
+RMODE ENDP
+;
+; load GDTR with GDTptr (only in real mode)
+;
+LoadGDTR PROC NEAR
+assume ds:GDTseg
+    mov  ax,GDTseg
+    mov  ds,ax
+    mov  eax,seg GDT
+    shl  eax,4
+    mov  bx,offset GDT
+    movzx ebx,bx
+    add  eax,ebx
+    mov  dword ptr GDTptr[2],eax
+    sgdt pword ptr GDTold       ; save the old gdt value    
+    lgdt pword ptr GDTptr       ; load the new
+    ret
+LoadGDTR ENDP
+;
+; load IDTR with IDTRptr (only in real mode)
+;
+LoadIDTR PROC NEAR
+assume ds:IDTseg
+    mov  ax,IDTseg
+    mov  ds,ax
+    mov  eax,seg IDT
+    shl  eax,4
+    mov  bx,offset IDT
+    movzx ebx,bx
+    add  eax,ebx
+    mov  dword ptr IDTptr[2],eax
+    sidt pword ptr IDTold       ; save the old idt value
+    lidt pword ptr IDTptr       ; load the new
+    ret
+LoadIDTR ENDP
+;
+; reset the descriptor registers to rmode status
+;
+ResetDTRs PROC NEAR
+assume ds:GDTseg
+    mov  ax,GDTseg
+    mov  ds,ax
+    lgdt pword ptr GDTold
+assume ds:IDTseg
+    mov  ax,IDTseg
+    mov  ds,ax
+    lidt pword ptr IDTold
+    ret
+ResetDTRs ENDP
+
+;
+; load the global descriptor table with preset pointers (only in real mode)
+;
+SetupGDT PROC NEAR
+; set GDT
+assume ds:GDTseg
+    mov  ax,GDTseg
+    mov  ds,ax
+;
+; descriptor for this code segment
+;
+    mov  ax,16
+    mov  word ptr GDT[thisseg+0],ax
+    mov  ax,PCode
+    mov  word ptr GDT[thisseg+2],ax
+    mov  al,TypeCode
+    mov  byte ptr GDT[thisseg+5],al
+;
+; descriptor for video segment
+;
+    mov  ax,16
+    mov  word ptr GDT[videoseg+0],ax
+    mov  ax,0A000h
+    mov  word ptr GDT[videoseg+2],ax
+    mov  al,TypeData
+    mov  byte ptr GDT[videoseg+5],al
+;
+; descriptor for gdt seg
+;
+    mov  ax,16
+    mov  word ptr GDT[gdtrseg+0],ax
+    mov  ax,GDTseg
+    mov  word ptr GDT[gdtrseg+2],ax
+    mov  al,TypeData
+    mov  byte ptr GDT[gdtrseg+5],al
+;
+; descriptor for idt seg
+;
+    mov  ax,16
+    mov  word ptr GDT[idtrseg+0],ax
+    mov  ax,IDTseg
+    mov  word ptr GDT[idtrseg+2],ax
+    mov  al,TypeData
+    mov  byte ptr GDT[idtrseg+5],al
+;
+; descriptor for temp seg
+;
+    mov  ax,16
+    mov  word ptr GDT[tempseg+0],ax
+    mov  ax,Temp
+    mov  word ptr GDT[tempseg+2],ax
+    mov  al,TypeData
+    mov  byte ptr GDT[tempseg+5],al
+;
+; descriptor for text segment
+;
+    mov  ax,16
+    mov  word ptr GDT[textseg+0],ax
+    mov  ax,0B800h
+    mov  word ptr GDT[textseg+2],ax
+    mov  al,TypeData
+    mov  byte ptr GDT[textseg+5],al
+;
+; descriptor for stack
+;
+    mov  ax,16
+    mov  word ptr GDT[stackseg+0],ax
+    mov  ax,Stack
+    mov  word ptr GDT[stackseg+2],ax
+    mov  al,TypeData
+    mov  byte ptr GDT[stackseg+5],al
+    ret
+SetupGDT ENDP
+;     
+; point each interrupt vector to IntHandler (only in real mode)
+;
+SetupIDT PROC NEAR
+; write to IDT
+assume ds:IDTseg
+    mov  ax,IDTseg
+    mov  ds,ax
+;
+; point all interrupts to IntHandler
+;
+    mov  cx,256
+    mov  di,0
+    mov  ax,thisseg
+    mov  ebx,offset IntHandler
+IDTWriteLoop:
+    mov  word ptr IDT[di],ax
+    add  di,2
+    mov  dword ptr IDT[di],ebx
+    add  di,4
+    dec  cx
+    jnz  IDTWriteLoop
+    ret
+SetupIDT ENDP
+;
+; set segments to default selectors (protected mode only)
+;
+SetSelect PROC NEAR 
+    mov  ax,tempseg
+    mov  es,ax
+    mov  ds,ax
+    mov  fs,ax
+    mov  gs,ax
+    ret
+SetSelect ENDP
+;
+; terminate the program (real mode only)
+;
+Terminate PROC NEAR
+assume ds:Code
+    mov  ax,Code
+    mov  ds,ax
+    mov  ah,9h
+    mov  dx,offset TerMsg
+    int  21h
+    mov  ax,4C00h
+    int  21h
+TerMsg db 'Your program has been successfully terminated.',13,10,'$'
+Terminate ENDP
+;
+; jump to here in case of an error
+;
+    Error:
+    call ErrorHandler
+;
+Code    ENDS
+;
+; Protected Mode Code Segment
+;
+PCode   SEGMENT 'CODE' PUBLIC USE16
+        assume cs:PCode
+PCode   ENDS
+;
+; Temporary Data Segment
+;
+Temp    SEGMENT 'DATA' USE16 PUBLIC
+Temp    ENDS

@@ -1,0 +1,103 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.rmi.*;
+<font color=#0000FF>import</font> java.util.*;
+
+<font color=#0000FF>public</font> <font color=#0000FF>interface</font> Cartographer <font color=#0000FF>extends</font> Remote{
+
+    <font color=#9A1900>/** 
+     * Also, you need to call the rmic compiler on your implementation class, 
+     *and you need to include the following in your constructor.
+
+      public Cartographer(){
+	super();
+	 try {
+            UnicastRemoteObject.exportObject(this);
+        }
+        catch(RemoteException re) {
+            re.printStackTrace();
+	    }
+	    }
+    */</font>
+
+    <font color=#9A1900>/**
+     * This method is called by the auction server to get the cartographers bid
+     * price for a given Lot.  You need to return the price you will pay for the Lot. 
+     *
+     *@param lot The lot that you are required to bid on
+     *
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getBid(Lot lot) <font color=#0000FF>throws</font> RemoteException;
+    
+    <font color=#9A1900>/** Called by server to submit to you the Lot that has just been auctioned, plus a outcome
+	
+	PLEASE LOOK IN AUCTION SERVER INTERFACE FOR THE FLAGS FOR THIS CONSTANT
+	NO_CONNECTIONS = no customers conected to server
+	NO_BIDS = no bids (i.e. all bids zero)
+	BELOW_RESERVE  = no bid above reserve price (i.e. at least one bid over zero, but not above reserve)
+	YOU_SOLD_LOT = you submitted a lot for auction and it was succesfully sold
+    *
+    *@param lot the lot which was auctioned
+    *@param outcome what happened (as above)
+    */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> auctionResult(Lot lot, <font color=#009900>int</font> outcome) <font color=#0000FF>throws</font> RemoteException;
+  
+    <font color=#9A1900>/**
+     * You won the auction. 
+     * Method called upon successful completion of bid to allow receipt of Region.
+     * You will also get sent the lot with bid values filled in so you can see what went on
+     *
+     *@param lot the lot that you one, complete with region.mapdata filled in
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> youWon(Lot lot) <font color=#0000FF>throws</font> RemoteException;
+
+    <font color=#9A1900>/**
+     * You lost the auction.
+     * This method is called if you lose the auction.  Again, it returns you the completed lot, but with the
+     * bid prices filled in so you can make decisions based on all 3 bids and the mapdata set to zero.
+     *
+     *@param lot the lot you lost, with region.mapdata still set to zero.
+     */</font>    
+    <font color=#0000FF>public</font> <font color=#009900>void</font> youLost(Lot lot) <font color=#0000FF>throws</font> RemoteException;
+
+
+    <font color=#9A1900>/**
+     * Method called submitting your quotes to you.  (Vector of quotes)
+     *Decide which quote to accept and call acceptQuote on the server. 
+     *
+     *@param quotes The vector of 0 or more quotes from robots has been collected by the server.
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> quotesReady(Vector quotes) <font color=#0000FF>throws</font> RemoteException;
+   
+    
+    <font color=#9A1900>/**
+     * Method called when broadcasting information to all cartographers to inform them
+     * of a contract being made between cartorgrapher and a robot for a given quote.
+     *
+     *@param cartID Group number of cartographer who has made the contract
+     *@param robotID Group number of robot who has made the contract
+     *@param quote The quote that the contract has been made for
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> contractMade(<font color=#009900>int</font> cartID, <font color=#009900>int</font> robotID, Quote quote) <font color=#0000FF>throws</font> RemoteException;
+ 
+    <font color=#9A1900>/**
+     * Submitting you you region when contract is finished
+     *@param r region that you got from your contract
+     *@param accuracy the accuracy of your completed region  
+     *
+     */</font>
+    <font color=#0000FF>public</font> <font color=#009900>void</font> submitRegion(Region r, <font color=#009900>int</font> accuracy) <font color=#0000FF>throws</font> RemoteException;
+}
+
+
+
+
+
+
+
+
+
+</tt>
+</pre>

@@ -1,0 +1,6 @@
+
+; last updated: 20-01-96
+
+ENDO:
+    mov  ah,4ch                  ; dos terminate program
+    int  21h

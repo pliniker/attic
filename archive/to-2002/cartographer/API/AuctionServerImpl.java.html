@@ -1,0 +1,639 @@
+<pre>
+<tt>
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#9A1900>/**
+* Implementation of Auction Server interface
+* @author Gus Paul
+* @version 1.0
+* 7/6/2001
+*/</font>
+
+<font color=#0000FF>import</font> java.rmi.*;
+<font color=#0000FF>import</font> java.rmi.server.*;
+<font color=#0000FF>import</font> java.util.*;
+<font color=#0000FF>import</font> java.io.*;
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> AuctionServerImpl <font color=#0000FF>extends</font> UnicastRemoteObject <font color=#0000FF>implements</font> AuctionServer{
+    <font color=#0000FF>private</font> <font color=#009900>int</font> newLotNo, newJobNo;
+    <font color=#0000FF>private</font> Vector oldLots, activeJobs, registered;
+    <font color=#0000FF>private</font> BankImpl bank;
+    <font color=#0000FF>private</font> TimeImpl time;
+    <font color=#0000FF>private</font> Region map;
+
+    <font color=#0000FF>public</font> AuctionServerImpl() <font color=#0000FF>throws</font> RemoteException{
+	<font color=#0000FF>super</font>();
+	newLotNo = <font color=#CC33CC>1</font>;
+      	newJobNo = <font color=#CC33CC>1</font>;
+	registered = <font color=#0000FF>new</font> Vector();
+	oldLots = <font color=#0000FF>new</font> Vector();
+	activeJobs = <font color=#0000FF>new</font> Vector();
+    }
+    
+    <font color=#0000FF>public</font> AuctionServerImpl(BankImpl bank, TimeImpl time, Region map) <font color=#0000FF>throws</font> RemoteException{
+	<font color=#0000FF>this</font>();
+	<font color=#0000FF>this</font>.bank = bank;
+	<font color=#0000FF>this</font>.time = time;
+	<font color=#0000FF>this</font>.map = map;
+    }
+
+	
+    <font color=#0000FF>public</font> <font color=#009900>void</font> register(Object o, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> InvalidAccountNoException, AlreadyRegisteredException{    
+	<font color=#0000FF>synchronized</font>(registered){
+	    
+	    <font color=#0000FF>if</font> ( (o <font color=#0000FF>instanceof</font> Robot) || (o <font color=#0000FF>instanceof</font> Cartographer) ){
+		<font color=#0000FF>if</font> (!(bank.isValid(accountNo)))
+		    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException();
+		
+		<font color=#0000FF>if</font>(!(registered.contains(<font color=#0000FF>new</font> Integer(accountNo)))){
+		    registered.addElement(o);
+		    registered.addElement(<font color=#0000FF>new</font> Integer(accountNo) ); 
+		    <font color=#0000FF>try</font>{
+			System.out.println(<font color=#FF0000>"Auction Server: Registered group: "</font> + bank.getName(accountNo) );
+			System.out.println(<font color=#FF0000>"****Registered vector: "</font> + registered);
+		    }
+		    <font color=#0000FF>catch</font>(Exception ie){
+			System.err.println(<font color=#FF0000>"AuctionServer: Exception in register line 53"</font>);
+		    }
+		}
+		<font color=#0000FF>else</font>{
+		    <font color=#009900>int</font> x = (registered.indexOf(<font color=#0000FF>new</font> Integer(accountNo))) - <font color=#CC33CC>1</font>;
+		    
+		    <font color=#0000FF>if</font>(x != -<font color=#CC33CC>1</font>){
+			registered.removeElementAt(x);
+			registered.insertElementAt(o, x);
+			<font color=#0000FF>try</font>{
+			    System.out.println(<font color=#FF0000>"Auction Server: Re-registered group: "</font> + bank.getName(accountNo) );
+			}
+			<font color=#0000FF>catch</font>(Exception ie){
+			    System.err.println(<font color=#FF0000>"AuctionSever: Exception in register line 66"</font>);
+			}
+		    }
+		    <font color=#0000FF>else</font>
+			System.err.println(<font color=#FF0000>"Something has gone seriously pear shaped"</font>);
+		}
+	    }
+	}
+	
+    }
+   
+    <font color=#009900>void</font> unregister(Object o){
+	<font color=#0000FF>synchronized</font>(registered){
+	    <font color=#009900>int</font> x = registered.indexOf(o);
+	    
+	    <font color=#0000FF>if</font>(x != -<font color=#CC33CC>1</font>){
+		registered.removeElementAt(x);   <font color=#9A1900>// remove callback object
+</font>		<font color=#9A1900>//registered.removeElementAt(x);   // remove account number - now moved to print statement below
+</font>		<font color=#0000FF>try</font>{
+		    System.out.println(<font color=#FF0000>"Successfully Unregistered "</font> + bank.getName( ((Integer)registered.remove(x)).intValue() ));
+		}
+		<font color=#0000FF>catch</font>(Exception ie){
+		    System.err.println(<font color=#FF0000>"AuctionServer: Exception in unregister line 88"</font>);
+		}    
+	    }
+	    
+	    <font color=#0000FF>else</font>{
+		System.err.println(<font color=#FF0000>"Unregister: Cartographer/Robot wasn't registered"</font>);	
+	    }
+	    
+	    
+	}
+    }
+
+    <font color=#0000FF>private</font> <font color=#009900>int</font> getAccountNo(Object cartOrRobot){
+	<font color=#0000FF>return</font> ((Integer) registered.get( registered.indexOf(cartOrRobot) + <font color=#CC33CC>1</font> )).intValue(); 
+    }
+
+    <font color=#0000FF>private</font> Object getCallback(<font color=#009900>int</font> accountNo){
+	<font color=#0000FF>return</font> (registered.get( registered.indexOf(<font color=#0000FF>new</font> Integer(accountNo)) - <font color=#CC33CC>1</font> ));
+    }
+
+
+    <font color=#0000FF>static</font> <font color=#0000FF>private</font> Random generator = <font color=#0000FF>new</font> Random();
+
+    <font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>void</font> submitRegion (Region realRegion, <font color=#009900>int</font> reserve, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException{
+	<font color=#9A1900>//Region submitted for selling.  This is the function that will do the auction stuff
+</font>	<font color=#9A1900>//System.out.println ("AuctionServer: submitRegion start");	
+</font>	Region lotRegion = <font color=#0000FF>new</font> Region(realRegion);
+	<font color=#009900>float</font> highest = <font color=#CC33CC>0</font>, sale = <font color=#CC33CC>0</font>;
+	Vector bids = <font color=#0000FF>new</font> Vector();
+       
+	<font color=#0000FF>if</font>(!(bank.isValid(accountNo)) || bank.isServiceProvider(accountNo) ) <font color=#9A1900>//check that the seller is valid
+</font>	    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException();
+	
+	Lot bidLot;
+	<font color=#0000FF>synchronized</font>(<font color=#0000FF>this</font>){ 
+	    bidLot = <font color=#0000FF>new</font> Lot(lotRegion, newLotNo++, map.checkMap(realRegion) );
+	}
+	
+	<font color=#0000FF>if</font> (bank.isRobot(accountNo)){
+	    <font color=#9A1900>//check if any Cartographers are connected, and if not return NO_CONNECTIONS
+</font>	    
+	    Robot rob = (Robot)getCallback(accountNo);
+	    
+	    <font color=#009900>boolean</font> connected = false;
+	    <font color=#0000FF>for</font>(Enumeration e = registered.elements(); e.hasMoreElements();){
+		Object o = e.nextElement();
+		<font color=#0000FF>if</font> (o <font color=#0000FF>instanceof</font> Cartographer){
+		    connected = true;
+		    <font color=#0000FF>break</font>;
+		}
+	    }   
+	    
+	    <font color=#0000FF>if</font> (!connected){
+		bidLot.setReserve(reserve);
+		<font color=#0000FF>try</font>{
+		    rob.auctionResult(realRegion, AuctionServer.NO_CONNECTIONS);
+		    oldLots.addElement(bidLot);
+		    <font color=#0000FF>return</font>;
+		}
+		<font color=#0000FF>catch</font> (RemoteException re){
+		    <font color=#0000FF>this</font>.unregister(rob);
+		} 
+	    }
+	}
+
+	<font color=#0000FF>if</font> (bank.isCartographer(accountNo)){
+	    <font color=#009900>int</font> cartsConnected = <font color=#CC33CC>0</font>;
+	    <font color=#0000FF>for</font>(Enumeration e = registered.elements(); e.hasMoreElements();){
+		Object o = e.nextElement();
+		<font color=#0000FF>if</font> (o <font color=#0000FF>instanceof</font> Cartographer){
+		    cartsConnected++;
+		}
+	    }
+	    
+	    <font color=#0000FF>if</font>( cartsConnected&lt;<font color=#CC33CC>2</font> ){ 
+		<font color=#9A1900>//if there is not more than 1 cartographer connected, but cartographer is selling then noone can buy the lot.
+</font>		Cartographer cart = (Cartographer)getCallback(accountNo);
+		 bidLot.setReserve(reserve);
+		 <font color=#0000FF>try</font>{
+		    cart.auctionResult(bidLot, AuctionServer.NO_CONNECTIONS);
+		    <font color=#0000FF>return</font>;
+		}
+		<font color=#0000FF>catch</font> (RemoteException re){
+		    <font color=#0000FF>this</font>.unregister(cart);
+		} 
+	    }
+	    
+	}
+	
+	<font color=#9A1900>//get the cartographer's bids
+</font>	<font color=#0000FF>for</font> (Enumeration e = registered.elements(); e.hasMoreElements();){
+	    Object o = (Object) e.nextElement();
+	    <font color=#009900>float</font> bid = <font color=#CC33CC>0</font>;
+	    System.out.println(<font color=#FF0000>"***bids vector "</font> + bids);
+	    <font color=#0000FF>if</font> ( o <font color=#0000FF>instanceof</font> Cartographer){
+		Cartographer bidder = (Cartographer) o;
+		<font color=#0000FF>if</font>( getAccountNo(o) != accountNo){
+		    
+		    <font color=#0000FF>try</font>{	
+			System.out.println(bank.getName(getAccountNo(bidder)) + <font color=#FF0000>" is involved in the Auction of region number "</font> + realRegion.region_id);
+			bid = (<font color=#009900>float</font>)bidder.getBid(bidLot);
+		    }
+		    <font color=#0000FF>catch</font>(RemoteException re){
+			<font color=#0000FF>this</font>.unregister(bidder);
+		    }
+		    <font color=#0000FF>catch</font>(InvalidAccountNoException ie){
+			System.err.println(<font color=#FF0000>"AuctionServer: Invalid Account line 191"</font>);
+		    }
+		    bid += generator.nextFloat();<font color=#9A1900>//random number 
+</font>		    bids.addElement(<font color=#0000FF>new</font> Float(bid));
+		    bids.addElement(o);
+		    Bid bidObject = <font color=#0000FF>new</font> Bid(bank.getCartographerID(getAccountNo(o)), (<font color=#009900>int</font>)bid);
+		    bidLot.setBid(bidObject);
+		}
+		<font color=#0000FF>else</font>{
+		    System.out.println(bank.getName(getAccountNo(o)) + <font color=#FF0000>" is not involved in the Auction as they are the seller."</font>); 
+		}       
+	    }
+	}
+	<font color=#9A1900>//System.out.println("bids " + bids.size());
+</font>	
+	bidLot.setReserve(reserve);  <font color=#9A1900>//set the reserve price
+</font>	
+	<font color=#0000FF>for</font>(Enumeration e = bids.elements(); e.hasMoreElements(); ){
+	    Object o =  e.nextElement();
+	    <font color=#0000FF>if</font>(o <font color=#0000FF>instanceof</font> Float){
+		<font color=#009900>float</font> next = ((Float)o).floatValue();
+		<font color=#0000FF>if</font>(next &gt; highest){
+		    sale = highest;
+		    highest = next;
+		    
+		}
+	    }
+	}
+	
+	<font color=#0000FF>if</font> ((<font color=#009900>int</font>)highest &lt;= <font color=#CC33CC>0</font>){
+	    <font color=#0000FF>if</font>(bank.isRobot(accountNo)){
+		<font color=#9A1900>//tell owner of the region no bids made
+</font>		Robot rob = (Robot) getCallback(accountNo);
+		<font color=#0000FF>try</font>{
+		    rob.auctionResult(realRegion, AuctionServer.NO_BIDS);
+		    oldLots.addElement(bidLot);
+		    <font color=#0000FF>return</font>;
+		}
+		<font color=#0000FF>catch</font>(RemoteException re){
+		    <font color=#0000FF>this</font>.unregister(rob);
+		}
+	    }
+	    <font color=#0000FF>else</font>{
+		Cartographer cart = (Cartographer) getCallback(accountNo);
+		<font color=#0000FF>try</font>{
+		    cart.auctionResult(bidLot, AuctionServer.NO_BIDS);
+		    oldLots.addElement(bidLot);
+		    <font color=#0000FF>return</font>;
+		}
+		<font color=#0000FF>catch</font>(RemoteException re){ 
+		    <font color=#0000FF>this</font>.unregister(cart);
+		}
+	    }
+	}
+        <font color=#0000FF>if</font> ((<font color=#009900>int</font>)highest &lt; reserve){
+	    <font color=#9A1900>//tell owner of the region no bid above reserve
+</font>	       <font color=#0000FF>if</font>(bank.isRobot(accountNo)){
+		   Robot rob = (Robot) getCallback(accountNo);
+		   <font color=#0000FF>try</font>{ 
+		       rob.auctionResult(realRegion, AuctionServer.BELOW_RESERVE);
+		       oldLots.addElement(bidLot);
+		       <font color=#0000FF>return</font>; 
+		   } 
+		   <font color=#0000FF>catch</font>(RemoteException re){
+		       <font color=#0000FF>this</font>.unregister(rob);
+		   }
+	       }
+	       <font color=#0000FF>else</font>{
+		   Cartographer cart = (Cartographer) getCallback(accountNo);
+		   <font color=#0000FF>try</font>{
+		       cart.auctionResult(bidLot, AuctionServer.BELOW_RESERVE);
+		       oldLots.addElement(bidLot);
+		       <font color=#0000FF>return</font>; 
+		   }
+		   <font color=#0000FF>catch</font>(RemoteException re){
+		       <font color=#0000FF>this</font>.unregister(cart);
+		   }
+	       }
+	}
+	
+	<font color=#0000FF>if</font> ( !(highest &lt; reserve) &amp;&amp; ((<font color=#009900>int</font>)sale &lt; reserve) )
+	    <font color=#9A1900>//sell at the reserve price if somone has bid over it, but second price is below reserve.
+</font>	    sale = reserve;
+	
+	System.out.println(<font color=#FF0000>"highest "</font> + highest);
+	System.out.println(<font color=#FF0000>"sale "</font> + sale);
+	System.out.println(<font color=#FF0000>"reserve "</font> + reserve);
+	
+	Cartographer winner = (Cartographer) bids.get(bids.indexOf(<font color=#0000FF>new</font> Float(highest) ) + <font color=#CC33CC>1</font> );
+
+	System.out.println(<font color=#FF0000>"seller is "</font> + bank.getName(accountNo) );
+	System.out.println(<font color=#FF0000>"winner is "</font> + bank.getName(getAccountNo(winner)));
+	
+	bidLot.setReserve(reserve); <font color=#9A1900>//we have a winner so we can set the reserve price in the Lot
+</font>	oldLots.addElement(bidLot); <font color=#9A1900>//put lot in storage
+</font>	
+	<font color=#0000FF>for</font> (Enumeration e = registered.elements(); e.hasMoreElements();){
+	    Object o = (Object) e.nextElement();
+	    <font color=#0000FF>if</font>(o <font color=#0000FF>instanceof</font> Cartographer){
+		Cartographer cart = (Cartographer) o;
+		<font color=#009900>int</font> buyer_accountNo = getAccountNo(cart);
+		
+		bidLot.setReserve(reserve);
+		
+		<font color=#0000FF>if</font> (cart == winner){
+		    bidLot.setRegion(realRegion);
+		    <font color=#0000FF>try</font>{
+			cart.youWon(bidLot);
+			<font color=#9A1900>//WORK OUT HOW TO TELL OWNER THEY SOLD IT
+</font>
+		    }
+		    <font color=#0000FF>catch</font>(RemoteException re){
+			<font color=#0000FF>this</font>.unregister(cart);
+			<font color=#9A1900>//winner has gone down, so unregister and re auction the region
+</font>			submitRegion(realRegion, reserve, accountNo);
+			<font color=#0000FF>return</font>;
+		    }
+		    
+		    bank.transfer(buyer_accountNo, accountNo, (<font color=#009900>int</font>)sale, <font color=#FF0000>"Auction fee for lot "</font> + bidLot.getLotNo());
+		    <font color=#0000FF>if</font> ( (<font color=#009900>int</font>)(sale/<font color=#CC33CC>10</font>) &gt;=<font color=#CC33CC>1</font>)
+			bank.transfer(buyer_accountNo, bank.SERVICEPROVIDERACCOUNTNUMBER, (<font color=#009900>int</font>)(sale/<font color=#CC33CC>10</font>), <font color=#FF0000>"Auctioneers fee for lot "</font> + bidLot.getLotNo());
+		    <font color=#0000FF>else</font>
+			bank.transfer(buyer_accountNo, bank.SERVICEPROVIDERACCOUNTNUMBER, <font color=#CC33CC>1</font>, <font color=#FF0000>"Auctioneers fee for lot "</font> + bidLot.getLotNo());
+		    
+		    <font color=#0000FF>return</font>;
+		}
+		
+		<font color=#0000FF>else</font>{
+		    <font color=#0000FF>try</font>{
+			cart.youLost(bidLot);
+		    }
+		    <font color=#0000FF>catch</font>(RemoteException re){
+			<font color=#0000FF>this</font>.unregister(cart);
+		    }
+		}
+	    }
+	    
+	}
+	
+    }
+    
+	
+    <font color=#0000FF>public</font> Lot getLot() <font color=#0000FF>throws</font> RemoteException, InvalidLotNoException{
+	
+	<font color=#0000FF>if</font> (!(oldLots.isEmpty())){
+	    Lot l = (Lot)oldLots.lastElement();
+	    <font color=#0000FF>return</font> l;
+	}
+	<font color=#0000FF>else</font>{
+	    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidLotNoException();
+	}
+    }
+    
+    <font color=#0000FF>public</font> Lot getLot(<font color=#009900>int</font> n) <font color=#0000FF>throws</font> RemoteException, InvalidLotNoException{
+
+	<font color=#0000FF>if</font> (n &lt; <font color=#CC33CC>0</font> || n &gt; oldLots.size() )
+	    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidLotNoException();
+
+	Lot l = (Lot) oldLots.elementAt(n);
+	<font color=#0000FF>return</font> l; 
+    }
+    
+    
+    <font color=#0000FF>public</font> Vector getAllLots() <font color=#0000FF>throws</font> RemoteException{
+	<font color=#0000FF>return</font> oldLots;    
+    }
+    
+    <font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>void</font> submitJob (Region region_wanted, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException{
+	<font color=#9A1900>//submit a contract for offer
+</font>	
+	<font color=#0000FF>if</font> (!(bank.isValid(accountNo)) || !(bank.isCartographer(accountNo)) ){
+	    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException();
+	}
+	
+	getQuotes(region_wanted, accountNo);
+	
+    }
+    
+    <font color=#009900>void</font> getQuotes (Region region_wanted, <font color=#009900>int</font> accountNo){
+	System.out.println(<font color=#FF0000>"Auction Server: getQuotes"</font>);
+	Vector quotes = <font color=#0000FF>new</font> Vector();
+	
+	<font color=#9A1900>//synchronized(registered){
+</font>	<font color=#0000FF>for</font> (Enumeration e = registered.elements(); e.hasMoreElements();){
+	    
+	    Object o = (Object) e.nextElement();    
+	    
+	    <font color=#0000FF>if</font> ( o <font color=#0000FF>instanceof</font> Robot){
+		Robot quoter = (Robot) o;
+		<font color=#0000FF>try</font>{
+		    quotes.addElement(quoter.getQuote(region_wanted));  
+		}
+		<font color=#0000FF>catch</font>(RemoteException re){
+		    System.out.println(<font color=#FF0000>"AuctionServer: getQuotes: Robot cannot be contacted"</font>);
+		    <font color=#0000FF>this</font>.unregister(quoter);
+		    <font color=#9A1900>//getQuotes(region_wanted, accountNo);
+</font>		    }
+	    }
+	}
+	<font color=#0000FF>for</font> (Enumeration e = registered.elements(); e.hasMoreElements();){
+	    Object o = (Object) e.nextElement(); 
+	    
+	    <font color=#0000FF>if</font>(o <font color=#0000FF>instanceof</font> Integer){
+		<font color=#009900>int</font> test_accountNo = ((Integer) o).intValue();
+		
+		<font color=#0000FF>if</font> (test_accountNo == accountNo){		    
+		    Cartographer cart = (Cartographer) getCallback (test_accountNo);
+		    <font color=#0000FF>try</font>{
+			System.out.println(<font color=#FF0000>"trying to send quotes to account no "</font> + test_accountNo + <font color=#FF0000>" &lt;-&gt; "</font> + accountNo);
+			cart.quotesReady(quotes);
+			
+		    }
+		    <font color=#0000FF>catch</font>(RemoteException re){
+			System.out.println(<font color=#FF0000>"AuctionServer: getQuotes: Cartographer cannot be sent bids"</font>);
+			<font color=#0000FF>this</font>.unregister(cart);
+				<font color=#9A1900>//inform robots?
+</font>			<font color=#0000FF>break</font>;
+			
+		    }
+		    
+		}
+	    }
+	}
+	<font color=#9A1900>//}
+</font>    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>void</font> acceptQuote (Quote quote, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException{
+	System.out.println(<font color=#FF0000>"Auction Server: Accept quote"</font>);
+	<font color=#9A1900>//REMEMBER TO ADD CONTRACT MADE 
+</font>	<font color=#0000FF>if</font> (!(bank.isCartographer(accountNo)) ){
+	    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException();
+	}
+	
+	<font color=#9A1900>//synchronized(registered){
+</font>	
+	<font color=#0000FF>for</font> (Enumeration e = registered.elements(); e.hasMoreElements();){
+	    Object o =  e.nextElement();
+	    
+	    <font color=#0000FF>if</font> ( o <font color=#0000FF>instanceof</font> Robot){
+		Robot commisioned = (Robot) o;
+
+		<font color=#0000FF>if</font> ( bank.getRobotID(getAccountNo(o)) == quote.getRobotID() ){ 
+		    
+		    <font color=#0000FF>synchronized</font>(activeJobs){
+			
+			activeJobs.addElement(quote);
+			activeJobs.addElement( <font color=#0000FF>new</font> Integer(accountNo) );
+			activeJobs.addElement( <font color=#0000FF>new</font> Long(time.getTime()) );
+		    }
+		    <font color=#0000FF>try</font>{
+			commisioned.confirmQuote(quote);
+			
+		    }
+		    <font color=#0000FF>catch</font>(RemoteException re){
+			<font color=#0000FF>this</font>.unregister(commisioned);
+			<font color=#009900>int</font> x = activeJobs.indexOf(quote);
+			
+			<font color=#0000FF>if</font>(x != -<font color=#CC33CC>1</font>){
+			    activeJobs.removeElementAt(x);  
+			    activeJobs.removeElementAt(x); 
+			    activeJobs.removeElementAt(x); 
+			    
+			}
+			<font color=#0000FF>throw</font> <font color=#0000FF>new</font> RemoteException();
+			    
+		    }
+		    
+		    <font color=#9A1900>//put in here to deal with broadcasting contract confirmation
+</font>		    <font color=#9A1900>//cartID = bank.getGroupNumber
+</font>		    
+		}
+	    }
+	}
+	<font color=#9A1900>//}
+</font>    }
+
+
+    <font color=#0000FF>public</font> <font color=#009900>void</font> deliverContract(Region region, <font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, ContractException, InvalidAccountNoException{
+	System.out.println(<font color=#FF0000>"AuctionServer: deliverContract"</font>);
+
+	<font color=#009900>long</font> end_time = time.getTime();
+	<font color=#009900>int</font> actual_accuracy = map.checkMap(region);
+	<font color=#009900>int</font> time_penalty = <font color=#CC33CC>0</font>;
+	<font color=#009900>int</font> accuracy_penalty = <font color=#CC33CC>0</font>;
+
+	<font color=#0000FF>if</font> (!(bank.isRobot(accountNo)) )
+	    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException();
+     
+	<font color=#0000FF>for</font> (Enumeration e = activeJobs.elements(); e.hasMoreElements();){
+	    
+	    Object o = (Object) e.nextElement();
+       
+	    <font color=#0000FF>if</font> ( o <font color=#0000FF>instanceof</font> Quote){
+		Quote complete = (Quote) o;
+		
+		<font color=#0000FF>if</font> ( complete.getRegion().region_id == region.region_id  ){
+		    <font color=#009900>int</font> cart_accountNo = ((Integer) activeJobs.get( activeJobs.indexOf(o) + <font color=#CC33CC>1</font> )).intValue();
+		    <font color=#9A1900>//get account no of cartographer
+</font>		    <font color=#009900>long</font> start_time =  ((Long) activeJobs.get( activeJobs.indexOf(o) + <font color=#CC33CC>2</font> )).longValue();
+		    <font color=#9A1900>//get time that job started
+</font>		    <font color=#009900>long</font> time_diff = (end_time - start_time) - complete.getTime();
+		    <font color=#9A1900>//work out time penalty(actual time - predicted)
+</font>		    <font color=#009900>int</font> acc_diff = complete.getAccuracy() - actual_accuracy; 
+		    <font color=#9A1900>//work out accuracy penalty(predicted - actual)		    
+</font>
+		    <font color=#0000FF>if</font> (time_diff &gt; <font color=#CC33CC>0</font> ){
+			time_penalty = (<font color=#009900>int</font>) time_diff * Bank.TIMEPENALTY;
+		    }
+		    
+		    <font color=#0000FF>if</font> (acc_diff &gt; <font color=#CC33CC>0</font>){
+			accuracy_penalty = acc_diff * Bank.ACCURACYPENALTY;
+		    }
+		    
+		    System.out.println(<font color=#FF0000>"Cartographer(payer) "</font> + bank.getName(cart_accountNo) );
+		    System.out.println(<font color=#FF0000>"Robot (payee) "</font> + bank.getName(accountNo));
+
+
+		    <font color=#0000FF>try</font>{
+			bank.transfer(cart_accountNo, accountNo, complete.getPrice(), <font color=#FF0000>"Contract for region: "</font> + complete.getRegion().region_id);
+			bank.transfer(accountNo, cart_accountNo, time_penalty, <font color=#FF0000>"Time penalty for contract for region: "</font> + complete.getRegion().region_id);
+			 bank.transfer(accountNo, cart_accountNo, accuracy_penalty, <font color=#FF0000>"Accuracy penalty for contract for region: "</font> + complete.getRegion().region_id);
+			bank.transfer(accountNo, bank.SERVICEPROVIDERACCOUNTNUMBER, (complete.getPrice()/<font color=#CC33CC>20</font>), <font color=#FF0000>"Administration charge for contract for region: "</font> + complete.getRegion().region_id);
+			<font color=#9A1900>//transfer money
+</font>
+			bank.newTime(accountNo, time_diff);
+			bank.newAccuracy(accountNo, actual_accuracy);
+			<font color=#9A1900>//update reputation
+</font>		    }
+		    <font color=#0000FF>catch</font>(InvalidAccountNoException ie){
+			System.out.println(<font color=#FF0000>"AuctionServer: Something has gone seriously wrong...in deliverContract"</font>);
+		    }
+
+		    Cartographer cart = (Cartographer) registered.get( registered.indexOf(<font color=#0000FF>new</font> Integer(cart_accountNo)) - <font color=#CC33CC>1</font>);
+		    
+		    <font color=#0000FF>try</font> {
+			cart.submitRegion(region, actual_accuracy);    <font color=#9A1900>//submit the region to cartographer
+</font>			
+		    }
+		    <font color=#0000FF>catch</font> (RemoteException re){
+			System.err.println(<font color=#FF0000>"Auction Server: Cartographer down while trying to submit a complete contract.  Money already transfered"</font>);
+			<font color=#0000FF>this</font>.unregister(cart);
+			<font color=#0000FF>break</font>;
+		    }
+		    
+		    <font color=#009900>int</font> x = activeJobs.indexOf(o);
+		    
+		    <font color=#0000FF>if</font>(x != -<font color=#CC33CC>1</font>){
+			activeJobs.removeElementAt(x);  <font color=#9A1900>//remove quote
+</font>			activeJobs.removeElementAt(x);  <font color=#9A1900>//remove cart accountNo
+</font>			activeJobs.removeElementAt(x);  <font color=#9A1900>//remove start time
+</font>		    }
+		    <font color=#0000FF>break</font>;
+		}
+	    }
+	}
+	
+	<font color=#9A1900>//if(!contains(
+</font>	<font color=#9A1900>//throw new ContractException(); //we've dropped out of the iteration without doing anything, so contract doesn't exist
+</font>	
+    }
+    
+    <font color=#0000FF>public</font> <font color=#0000FF>synchronized</font> <font color=#009900>void</font> imFinished(<font color=#009900>int</font> accountNo) <font color=#0000FF>throws</font> RemoteException, InvalidAccountNoException{
+	FileOutputStream fout = <font color=#0000FF>null</font>;
+	<font color=#0000FF>try</font>{
+	    fout = <font color=#0000FF>new</font> FileOutputStream(<font color=#FF0000>"dump.txt"</font>, true);
+	}
+	<font color=#0000FF>catch</font>(FileNotFoundException fe){
+	    fe.printStackTrace();
+	}
+	
+	PrintStream printIt = <font color=#0000FF>new</font> PrintStream(fout);
+	
+	<font color=#0000FF>if</font>(!(bank.isValid(accountNo)))
+	    <font color=#0000FF>throw</font> <font color=#0000FF>new</font> InvalidAccountNoException();
+      	
+	<font color=#0000FF>this</font>.unregister(getCallback(accountNo));
+	
+	printIt.println(<font color=#FF0000>"Total lots sold: "</font> + oldLots.size());
+	
+	<font color=#0000FF>try</font>{
+	    bank.printStatement(accountNo, printIt);
+	    bank.printStatement(bank.SERVICEPROVIDERACCOUNTNUMBER, printIt);
+	}
+	<font color=#0000FF>catch</font> (InvalidAccountNoException ie){
+	    System.out.println(<font color=#FF0000>"imFinished: bad account no"</font>);
+	}
+    }
+    
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> <font color=#009900>void</font> main(String argv[]){
+	AuctionServerImpl as;
+	BankImpl bank;
+	TimeImpl time;
+	Region r; 
+	<font color=#9A1900>// Security set-up
+</font>	<font color=#0000FF>if</font> (System.getSecurityManager() == <font color=#0000FF>null</font>) {
+	    System.setSecurityManager(<font color=#0000FF>new</font> RMISecurityManager());
+	}
+		
+	<font color=#9A1900>// Set up the server
+</font>	<font color=#0000FF>try</font> {
+	    java.rmi.registry.LocateRegistry.createRegistry(<font color=#CC33CC>5001</font>);	    
+     
+	    time = <font color=#0000FF>new</font> TimeImpl();
+	    Naming.rebind(Bank.SERVERPATH + <font color=#FF0000>"/Time"</font>, time);
+	    System.out.println(<font color=#FF0000>"Time Server start up done"</font>);  
+
+	    bank = <font color=#0000FF>new</font> BankImpl();
+	    Naming.rebind(Bank.SERVERPATH + <font color=#FF0000>"/Bank"</font>, bank);
+	    System.out.println(<font color=#FF0000>"Bank Server start up done"</font>);
+	    <font color=#9A1900>//open account as service prov
+</font>	    <font color=#9A1900>//set BankImpl.serviceprovideraccountNo = new account number
+</font>
+	    <font color=#009900>int</font> spID = bank.openAccount(<font color=#FF0000>"ServiceProvider"</font>, <font color=#CC33CC>0</font>, <font color=#CC33CC>0</font>); 
+	    bank.SERVICEPROVIDERACCOUNTNUMBER = spID;
+
+	    r = <font color=#0000FF>new</font> Region();
+	    r = Region.getSampleRegion(<font color=#CC33CC>4</font>);
+	
+	    <font color=#9A1900>//set up auction server
+</font>	    as = <font color=#0000FF>new</font> AuctionServerImpl(bank, time, r);
+	    Naming.rebind(Bank.SERVERPATH + <font color=#FF0000>"/Auction"</font>, as);
+	} <font color=#0000FF>catch</font> (Exception e) {
+	    System.err.println(<font color=#FF0000>"Server start-up failed: "</font> + e);
+	    e.printStackTrace();
+	    System.exit(-<font color=#CC33CC>1</font>);
+	}
+	<font color=#9A1900>//r = Region.getSampleRegion(3);
+</font>	System.out.println(<font color=#FF0000>"Auction server start-up done."</font>);
+	<font color=#9A1900>//Region r2 = Region.getSampleRegion(4);
+</font>	<font color=#9A1900>// System.out.println("Accuracy: " + r2.checkMap(r));
+</font>	<font color=#9A1900>//Region r3 = Region.getSampleRegion(2);
+</font>	<font color=#9A1900>//Region r4 = Region.getSampleRegion(3);
+</font>	<font color=#9A1900>//r.xshow();
+</font>	<font color=#9A1900>//r2.xshow();
+</font>	<font color=#9A1900>//r3.xshow();
+</font>	<font color=#9A1900>//r4.xshow();
+</font>	<font color=#9A1900>//System.out.println("SubAccuracy" + r2.checkMap(r3));
+</font>
+    }    
+
+} <font color=#9A1900>//AuctionServer
+</font></tt>
+</pre>

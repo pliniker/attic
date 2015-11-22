@@ -1,0 +1,23 @@
+; miscellaneous procedures & functions
+
+;Delayloop
+Delay MACRO waitno
+    mov  ecx,waitno
+    Delayloop:
+        dec  ecx
+        cmp  ecx,0
+        jne  Delayloop
+    ENDM
+
+;Return
+ReturnStr db 13,10,'$'
+ReturnKey MACRO
+    push ds
+    ASSUME ds:Code
+    mov  ax,Code
+    mov  ds,ax
+    mov  ah,09h
+    mov  dx,offset ReturnStr
+    int  21h
+    pop  ds
+    ENDM

@@ -1,0 +1,77 @@
+Critters v1.0
+
+Operating instructions:
+
+To run a simple simulation:
+
+run 'engine':
+	command line options: (both or either may be ommitted)
+		-m <map file> (defaults to test.map)
+		-l <library file> (defaults to critters.lib)
+
+The map file and library file should be created by the utility programs 'mapper' and 
+'buildlib' respectively. Instructions on how to use these are included in their
+ respective directories (utils/mapper/) and (engine/Library/)
+
+then, run 'client': (either on the same machine or a seperate networked machine)
+	command line options: 
+		-h <hostname> (defaults to localhost (loopback))
+
+
+buidllib
++------+
+
+This is the tool for compiling many critter definition files into one usable
+library file. It is very easy to used, simply type:-
+
+./buidlib  :  to make a library called critters.lib from all
+              the crittter definition files in the current
+	      directory.
+	      
+./buidlib [filename] : to make a library called [filename] from
+                       all the critters definition files in the 
+		       current directory.
+		  
+The format of the critter definiton file is self explanatory and is best
+learned by example, see carny.dat and herby.dat.
+
+mapper 0.2
++-------------------+
+
+command line options:
+
+-fstdout : print output to console
+-f<file> : print output to <file>
+           note: don't enclose file in < >!
+
+-mh# : sets map height to # squares
+-mw# : sets map width to # squares
+
+-t$# : set terrain type $ percentage to #
+       if $ = 'w' then terrain type is water
+       if $ = 'p' then terrain type is plains
+       if $ = 'f' then terrain type is forest
+       if $ = 'i' then terrain type is impassable
+
+If you do not put the -f option first, the program will assume that it
+is writing to standard out and will be silent. This may not be what you 
+want, so specify a file or stdout as the first option.
+
++---------------------+
+map file definition 0.1
+
+x,y of map;x*y map squares with terrain type,altitude,initial food;
+
+altitude defines temperature and hence speed of food growth and rate pf
+critter energy use/loss.
+water can be at any altitude, i.e. rivers and lakes are allowed.
+altitude and food should be ignored if terrain type is impassable.
+
+terrain type: 0 = plains
+              1 = water
+              2 = forest
+              3 = impassable
+              if outside this range, take it as 0 (plains).
+altitude:     0 to 7; if outside this range, take it as 3.
+food level:   0 to 255; if outside this range, take it as 0.
+

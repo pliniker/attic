@@ -1,0 +1,60 @@
+
+; last updated: 05-01-96
+
+CreateFile  MACRO   path,attrib
+    clc
+    push ds
+    SetDs @data
+    mov  dx,offset path
+    mov  cx,attrib
+    mov  ah,4Ch
+    int  21h
+    pop  ds
+    ENDM
+
+OpenFile    MACRO   path,access
+    clc
+    push ds
+    SetDs @data
+    mov  dx,offset path
+    mov  al,access
+    mov  ah,3Dh
+    int  21h
+    pop  ds
+    ENDM
+
+CloseFile   MACRO   handle
+    clc
+    push ds
+    SetDs @data
+    mov  bx,handle
+    mov  ah,3Eh
+    int  21h
+    pop  ds
+    ENDM
+
+WriteFile   MACRO   handle,data,bytes
+    clc
+    push ds
+    SetDs @data
+    mov  bx,handle
+    mov  dx,offset data
+    mov  cx,bytes
+    mov  ah,40h
+    int  21h
+    pop  ds
+    ENDM
+
+ReadFile    MACRO   handle,segment,buffer,bytes
+    clc
+    push ds
+    SetDs @data
+    mov  bx,handle
+    mov  dx,offset buffer
+    mov  cx,bytes
+    mov  ax,segment
+    mov  ds,ax
+    mov  ah,3Fh
+    int  21h
+    pop  ds
+    ENDM

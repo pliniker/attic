@@ -1,0 +1,129 @@
+
+; New palette list
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+Palette LABEL BYTE
+z=0
+REPT 64
+db 0,z/3,z
+z=z+1
+ENDM
+z=0
+REPT 64
+db 0,(63-z)/3,(63-z)
+z=z+1
+ENDM
+
+z=0
+REPT 64
+db 0,0,(z*3)/5
+z=z+1
+ENDM
+z=0
+REPT 64
+db 0,0,((63-z)*3)/5
+z=z+1
+ENDM
+
+
+%out SetPalette
+; change palette macro > segment of list, offset of list
+SetPalette PROC NEAR
+    mov  cx,256
+    mov  ah,0
+DACLoadLoop:
+    mov  dx,03C8h
+    mov  al,ah
+    cli
+    out  dx,al       ;set the DAC location #
+    mov  dx,03C9h
+    lodsb
+    out  dx,al       ;set the red component
+    lodsb
+    out  dx,al       ;set the green component
+    lodsb
+    out  dx,al       ;set the blue component
+    sti
+    inc  ah
+    loop DACLoadLoop
+    ret
+SetPalette ENDP
+
+WarpFactor db 0
+WarpIncr   dw 0
+WarpStart  dw 0
+Red equ 0
+Green equ 1
+Blue equ 2
+WarpPalette PROC NEAR
+
+    mov  bl,WarpFactor
+
+    mov  cx,765
+    mov  di,WarpStart
+    add  di,3
+    WarpLoop:
+        mov  bh,Palette[di]
+        add  bh,bl
+        and  bh,111111b   
+        mov  Palette[di],bh
+        add  di,WarpIncr
+        cmp  di,768
+        jge  XitLoop
+        loop WarpLoop
+    XitLoop:
+
+    ret
+WarpPalette ENDP
+
+RotatePalRed PROC NEAR
+
+    mov  al,Palette[0]
+    mov  Palette[765],al
+    mov  di,3
+    mov  cx,0
+    Rotate1:
+        mov  bl,Palette[di]
+        mov  Palette[di-3],bl
+        add  di,3
+        inc  cx
+        cmp  cx,255
+        jne  Rotate1
+    ret
+RotatePalRed ENDP
+
+RotatePalGreen PROC NEAR
+
+    mov  al,Palette[1]
+    mov  Palette[766],al
+    mov  di,4
+    mov  cx,0
+    Rotate2:
+        mov  bl,Palette[di]
+        mov  Palette[di-3],bl
+        add  di,3
+        inc  cx
+        cmp  cx,255
+        jne  Rotate2
+    ret
+RotatePalGreen ENDP
+
+RotatePalBlue PROC NEAR
+              
+    mov  al,Palette[2]
+    mov  Palette[767],al
+    mov  di,5
+    mov  cx,0
+    Rotate3:
+        mov  bl,Palette[di]
+        mov  Palette[di-3],bl
+        add  di,3
+        inc  cx
+        cmp  cx,255
+        jne  Rotate3
+    ret
+RotatePalBlue ENDP
+
+Code ENDS

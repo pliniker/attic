@@ -1,0 +1,200 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>TextIODialog</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>TextIODialog</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>674</width>
+            <height>454</height>
+        </rect>
+    </property>
+    <property name="minimumSize">
+        <size>
+            <width>480</width>
+            <height>320</height>
+        </size>
+    </property>
+    <property name="paletteBackgroundColor">
+        <color>
+            <red>217</red>
+            <green>211</green>
+            <blue>203</blue>
+        </color>
+    </property>
+    <property name="caption">
+        <string>TextIO</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLayoutWidget" row="0" column="0">
+            <property name="name">
+                <cstring>layout5</cstring>
+            </property>
+            <vbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <property name="margin">
+                    <number>7</number>
+                </property>
+                <property name="spacing">
+                    <number>7</number>
+                </property>
+                <widget class="QLayoutWidget">
+                    <property name="name">
+                        <cstring>layout1</cstring>
+                    </property>
+                    <hbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>historyBox</cstring>
+                            </property>
+                            <property name="sizePolicy">
+                                <sizepolicy>
+                                    <hsizetype>7</hsizetype>
+                                    <vsizetype>5</vsizetype>
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="title">
+                                <string>History</string>
+                            </property>
+                            <grid>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLayoutWidget" row="0" column="0">
+                                    <property name="name">
+                                        <cstring>layout2</cstring>
+                                    </property>
+                                    <hbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QTextEdit">
+                                            <property name="name">
+                                                <cstring>formattedHistory</cstring>
+                                            </property>
+                                        </widget>
+                                    </hbox>
+                                </widget>
+                            </grid>
+                        </widget>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>dictionaryBox</cstring>
+                            </property>
+                            <property name="title">
+                                <string>Dictionary</string>
+                            </property>
+                            <grid>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QListBox" row="0" column="0">
+                                    <item>
+                                        <property name="text">
+                                            <string>New Item</string>
+                                        </property>
+                                    </item>
+                                    <property name="name">
+                                        <cstring>dictionary</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>0</hsizetype>
+                                            <vsizetype>7</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>100</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>150</width>
+                                            <height>32767</height>
+                                        </size>
+                                    </property>
+                                </widget>
+                            </grid>
+                        </widget>
+                    </hbox>
+                </widget>
+                <widget class="QLayoutWidget">
+                    <property name="name">
+                        <cstring>layout4</cstring>
+                    </property>
+                    <hbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QLineEdit">
+                            <property name="name">
+                                <cstring>sayText</cstring>
+                            </property>
+                        </widget>
+                        <widget class="QPushButton">
+                            <property name="name">
+                                <cstring>sayButton</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Speak entered text</string>
+                            </property>
+                        </widget>
+                    </hbox>
+                </widget>
+            </vbox>
+        </widget>
+    </grid>
+</widget>
+<connections>
+    <connection>
+        <sender>sayText</sender>
+        <signal>returnPressed()</signal>
+        <receiver>TextIODialog</receiver>
+        <slot>sayTextSlot()</slot>
+    </connection>
+    <connection>
+        <sender>sayButton</sender>
+        <signal>clicked()</signal>
+        <receiver>TextIODialog</receiver>
+        <slot>sayTextSlot()</slot>
+    </connection>
+    <connection>
+        <sender>dictionary</sender>
+        <signal>clicked(QListBoxItem*)</signal>
+        <receiver>TextIODialog</receiver>
+        <slot>addWordToTextSlot()</slot>
+    </connection>
+    <connection>
+        <sender>dictionary</sender>
+        <signal>doubleClicked(QListBoxItem*)</signal>
+        <receiver>TextIODialog</receiver>
+        <slot>sayWordNowSlot()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in implementation">form1.ui.h</include>
+</includes>
+<slots>
+    <slot>sayTextSlot()</slot>
+    <slot>sayWordNowSlot()</slot>
+    <slot>addWordToTextSlot()</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

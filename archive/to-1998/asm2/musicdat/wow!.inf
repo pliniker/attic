@@ -1,0 +1,16 @@
+
+; set speed to 6
+
+i0 equ 17500 ; hal_nodo
+i1 equ 6000 ; hal_op
+i2 equ 0
+i3 equ 6000 ; tom1
+i4 equ 4000 ; bsnare
+i5 equ 4000 ; bassd
+i6 equ 4000 ; snared
+i7 equ 4000 ; synthsna
+i8 equ 0
+i9 equ 6000 ; clash
+
+
+include music.dat

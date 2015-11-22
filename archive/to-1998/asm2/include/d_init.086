@@ -1,0 +1,10 @@
+
+; last updated: 20-01-96
+
+    db  'Program by Peter Liniker. Copyright PLC 1995.'
+
+BEGINNING:
+    mov  ax,@data
+    mov  ds,ax
+    clc
+

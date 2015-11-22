@@ -1,0 +1,14 @@
+
+i0 equ 0
+i1 equ 0
+i2 equ 0
+i3 equ 4000 ; tom1
+i4 equ 3000 ; bsnare
+i5 equ 3000 ; bassd
+i6 equ 3000 ; snared
+i7 equ 3000 ; synthsna
+i8 equ 0
+i9 equ 4000 ; clash
+
+
+include music.dat

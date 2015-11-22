@@ -1,0 +1,17 @@
+[Identification]
+Name=BEAST1
+Description1=a
+Description2=b
+Description3=c
+Description4=d
+
+[Parameters]
+Type=D11
+Size=D111
+FoodMaskVeg=D1
+FoodMaskMeat=D1
+TerrainMask=D111
+Other1=D11
+Other2=D11
+
+[Behaviour]

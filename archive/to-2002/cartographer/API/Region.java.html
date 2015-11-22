@@ -1,0 +1,422 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * Region.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+
+<font color=#0000FF>import</font> java.util.*;
+<font color=#0000FF>import</font> java.io.*;
+<font color=#0000FF>import</font> java.rmi.*;
+
+<font color=#9A1900>/*import java.awt.*;
+import java.awt.event.*;*/</font>
+
+<font color=#0000FF>public</font> <font color=#0000FF>class</font> Region <font color=#9A1900>/*extends Frame*/</font> <font color=#0000FF>implements</font> Serializable
+{              
+    <font color=#0000FF>public</font> <font color=#009900>int</font> x1,y1,x2,y2; 
+    <font color=#0000FF>public</font> Vector mapdata;   <font color=#9A1900>//vector of blocks. 
+</font>    <font color=#0000FF>public</font> <font color=#009900>int</font> region_id;
+    <font color=#0000FF>private</font> <font color=#0000FF>static</font> Bank bank;
+	
+    <font color=#0000FF>static</font> 
+    {
+	<font color=#0000FF>try</font> 
+	    {
+		<font color=#009900>int</font> accountNumber;
+		Remote robj = Naming.lookup(Bank.SERVERPATH + <font color=#FF0000>"/Bank"</font>);
+		bank = (Bank) robj;
+	    } 
+	<font color=#0000FF>catch</font> (Exception e) 
+	    { 
+		System.out.println(<font color=#FF0000>"REGION: RMI error! Unable to initialise RegionID, all RegionID's will be zero."</font>); 
+		<font color=#9A1900>// e.printStackTrace();
+</font>	    }		
+    }
+		
+    <font color=#0000FF>public</font> Region() 
+    {
+	x1=<font color=#CC33CC>0</font>;
+	x2=<font color=#CC33CC>0</font>;
+	y1=<font color=#CC33CC>0</font>;
+	y2=<font color=#CC33CC>0</font>;
+	<font color=#0000FF>try</font>
+	    {
+		<font color=#9A1900>//region_id = 0;
+</font>		region_id=bank.getNextRegionID();
+	    }
+	<font color=#0000FF>catch</font> (Exception e )
+	    {
+		System.out.println(<font color=#FF0000>"REGION: RMI warning! regionID is 0"</font>); 
+		region_id = <font color=#CC33CC>0</font>;	
+	    }
+	mapdata = <font color=#0000FF>new</font> Vector();
+    	
+	<font color=#9A1900>/*this.setSize(new Dimension(600, 400));
+    	this.setTitle("Region: "+region_id);
+    	this.validate();*/</font>
+
+    }
+
+    Region(Region r)
+    {
+	<font color=#0000FF>super</font>();
+	x1=r.x1;
+	x2=r.x2;
+	y1=r.y1;
+	y2=r.y2;
+        region_id=r.region_id;
+    }
+    
+    <font color=#009900>void</font> setRegion(Region r)
+    {
+	x1=r.x1;
+	x2=r.x2;
+	y1=r.y1;
+	y2=r.y2;
+        mapdata=r.mapdata;
+    }
+    
+    <font color=#0000FF>private</font> <font color=#009900>boolean</font> sameShape(Region r)
+    {
+	<font color=#0000FF>if</font> (r == <font color=#0000FF>null</font>) <font color=#0000FF>return</font> false;
+	<font color=#0000FF>return</font> (r.x1 == x1) &amp;&amp; (r.y1 == y1) &amp;&amp; (r.y2 == y2) &amp;&amp; (r.x2 == x2);
+    }
+	
+	
+    <font color=#0000FF>private</font> <font color=#009900>int</font> getXSize()
+    {
+	<font color=#0000FF>return</font> (x2 - x1) + <font color=#CC33CC>1</font>;
+    }
+	
+    <font color=#0000FF>private</font> <font color=#009900>int</font> getYSize()
+    {
+	<font color=#0000FF>return</font> (y2 - y1) + <font color=#CC33CC>1</font>;
+    }
+	
+    <font color=#0000FF>public</font> Block getBlockAt(<font color=#009900>int</font> x, <font color=#009900>int</font> y)
+    {
+	<font color=#009900>int</font> realx = x - x1;
+	<font color=#009900>int</font> realy = y - y1;
+	<font color=#009900>int</font> pos = realx * getXSize() + realy;
+	<font color=#0000FF>return</font> (Block)mapdata.get(pos);
+    }
+	
+    Region(Region r,<font color=#009900>int</font> $x1, <font color=#009900>int</font> $y1, <font color=#009900>int</font> $x2, <font color=#009900>int</font> $y2)
+    {
+	<font color=#0000FF>this</font>();
+	<font color=#0000FF>if</font> ( ($x1 &gt;= r.x1) &amp;&amp; ($y1 &gt;= r.y1) &amp;&amp; ($x2 &lt;= r.x2) &amp;&amp; ($y2 &lt;= r.y2) )
+	    {
+		x1 = $x1;
+		x2 = $x2;
+		y1 = $y1;
+		y2 = $y2;
+		<font color=#0000FF>for</font>(<font color=#009900>int</font> a=$x1;a&lt;=$x2;a++)
+		    <font color=#0000FF>for</font>(<font color=#009900>int</font> b=$y1;b&lt;=$y2;b++)
+			{
+			    mapdata.add(((Block)r.getBlockAt(a,b)).copy());
+			    <font color=#9A1900>//System.out.println("Add block at "+a+","+b);
+</font>			}
+	    }
+ 
+    }
+	
+    Region(Region r, Region q)
+    {
+	<font color=#0000FF>this</font>(r,q.x1,q.y1,q.x2,q.y2);
+    }
+	
+    <font color=#9A1900>/*void xshow()
+    {
+	int realx = getXSize();
+	int realy = getYSize();
+	    
+	this.setLayout(new GridLayout(realy,realx,0,0));
+		
+	Enumeration e = mapdata.elements();
+	this.removeAll();
+		
+	while (e.hasMoreElements())
+	    {
+		this.add((Block)e.nextElement());	
+	    }
+	    
+	this.setVisible(true);
+
+    }
+	
+    void xhide()
+    {
+	this.setVisible(false);
+    }*/</font>
+
+    <font color=#0000FF>public</font> <font color=#0000FF>static</font> Region getSampleRegion(<font color=#009900>int</font> value) 
+    {
+        Region myRegion = <font color=#0000FF>new</font> Region();
+		
+	<font color=#0000FF>switch</font>(value) {
+	
+	<font color=#0000FF>case</font> <font color=#CC33CC>1</font>: 
+	    myRegion.x1 = <font color=#CC33CC>0</font>;
+	    myRegion.x2 = <font color=#CC33CC>3</font>;
+	    myRegion.y1 = <font color=#CC33CC>0</font>;
+	    myRegion.y2 = <font color=#CC33CC>3</font>;
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,true));
+	    <font color=#0000FF>break</font>;
+
+
+	<font color=#0000FF>case</font> <font color=#CC33CC>4</font>: 
+	    myRegion.x1 = <font color=#CC33CC>0</font>;
+	    myRegion.x2 = <font color=#CC33CC>9</font>;
+	    myRegion.y1 = <font color=#CC33CC>0</font>;
+	    myRegion.y2 = <font color=#CC33CC>9</font>;
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,false));
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    <font color=#0000FF>break</font>;
+
+
+	<font color=#0000FF>case</font> <font color=#CC33CC>2</font>: 
+
+	    myRegion.x1 = <font color=#CC33CC>4</font>;
+	    myRegion.x2 = <font color=#CC33CC>7</font>;
+	    myRegion.y1 = <font color=#CC33CC>4</font>;
+	    myRegion.y2 = <font color=#CC33CC>7</font>;
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	
+	    <font color=#0000FF>break</font>;
+
+	<font color=#0000FF>case</font> <font color=#CC33CC>3</font>: 
+
+	    myRegion.x1 = <font color=#CC33CC>4</font>;
+	    myRegion.x2 = <font color=#CC33CC>7</font>;
+	    myRegion.y1 = <font color=#CC33CC>4</font>;
+	    myRegion.y2 = <font color=#CC33CC>4</font>;
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+		
+	
+	    <font color=#0000FF>break</font>;
+
+	<font color=#0000FF>default</font> : 
+
+	    myRegion.x1 = <font color=#CC33CC>0</font>;
+	    myRegion.x2 = <font color=#CC33CC>3</font>;
+	    myRegion.y1 = <font color=#CC33CC>0</font>;
+	    myRegion.y2 = <font color=#CC33CC>3</font>;
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+		
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,false,true));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,false,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,false,false));
+
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,false,true,true));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,false,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(true,true,true,false));
+	    myRegion.mapdata.addElement(<font color=#0000FF>new</font> Block(false,true,true,true));
+	    <font color=#0000FF>break</font>;
+	
+	}
+		
+	<font color=#0000FF>return</font> myRegion;
+    }
+	
+    <font color=#009900>int</font> checkMap(Region r)
+    {
+	<font color=#9A1900>/*int samewalls = 0;
+	Region subRegion;
+	Enumeration ref, prop;
+	if ( ( r == null ) || ( r.mapdata == null) || (this.mapdata == null ))
+	    {
+		System.out.println("REGION: null mapdata or region error.");
+		return samewalls;
+	    }
+			
+	subRegion = new Region(this, r);
+	if ( !r.sameShape(subRegion) ) 
+	    {
+		System.out.println("REGION: Region for checking exceeds reference region.");
+		return samewalls;
+	    }
+			
+	ref = subRegion.mapdata.elements();
+	prop = r.mapdata.elements();
+			
+	while (ref.hasMoreElements())
+	    {
+		samewalls += ((Block)ref.nextElement()).compare((Block)prop.nextElement());
+				// System.out.println("Same walls count: " + samewalls);
+	    }
+			
+	return (samewalls * 1000) / (r.mapdata.size() * 4);*/</font>
+	<font color=#0000FF>return</font> <font color=#CC33CC>1000</font>;
+    }
+	
+}
+</tt>
+</pre>

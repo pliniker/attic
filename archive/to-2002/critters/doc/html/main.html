@@ -1,0 +1,278 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.51 [en] (X11; I; Linux 2.2.5-15 i686) [Netscape]">
+   <title>Main</title>
+</head>
+<body text="#0000FF" bgcolor="#000000" link="#8080FF" vlink="#4040FF" background="stars.jpg">
+
+<h1>
+<a NAME="BRIEF"></a><b><font color="#3366FF">Project Brief</font></b></h1>
+
+<p><br><font color="#FFFF80">Our project brief was to create a software
+simulation in time and space of a simple ecosystem and to display the results
+of this simulation graphically. The simulation space is divided into squares
+that may contain food and be occupied by animals we call 'critters'. Except
+during conflict resolution, no more than one critter may occupy each square.</font>
+<p><font color="#FFFF80">The project brief suggested that there were two
+species of critter - herbivores and carnivores. Herbivores eat food that
+they find growing in squares; carnivores eat other critters. The brief
+also suggested that critters go forth and multiply.</font>
+<br>&nbsp;
+<h1>
+<a NAME="REASONS"></a><b><font color="#3366FF">Reasons for choosing this
+Project</font></b></h1>
+<font color="#FFFF80">The overall project was composed of several sub-tasks
+that could be easily separated out and allocated to individual members
+of the group. The basic project brief left several areas for interpretation
+and extension:</font>
+<ul>
+<li>
+<font color="#FFFF80">Two fixed species were defined with only one inherited
+characteristic:</font></li>
+
+<ul>
+<li>
+<font color="#FFFF80">Herbivore / Carnivore species type</font></li>
+</ul>
+
+<li>
+<font color="#FFFF80">Only two types of terrain were defined:</font></li>
+
+<ul>
+<li>
+<font color="#FFFF80">Normal</font></li>
+
+<li>
+<font color="#FFFF80">Impassable</font></li>
+</ul>
+</ul>
+
+<h1>
+<a NAME="EXTENSIONS"></a><font color="#3366FF">Extensions to basic project
+outline</font></h1>
+<font color="#FFFF80">As our first extension, we defined several terrain
+types:</font>
+<ul>
+<li>
+<font color="#FFFF80">Plains</font></li>
+
+<li>
+<font color="#FFFF80">Forest</font></li>
+
+<li>
+<font color="#FFFF80">Water</font></li>
+
+<li>
+<font color="#FFFF80">Impassable</font></li>
+</ul>
+<font color="#FFFF80">To gain any insight into the effects of defining
+several terrain types, it was clear that the different terrain types needed
+to be 'clumped' together on the map. An automatic map generator was written
+to create realistic maps. With this tool the user can specify the width
+and height of the map, the ratio of the four terrain types in the map and
+the file to which the map data must be written.</font>
+<p><font color="#FFFF80">We extended the idea of multiple terrain types
+and gave the critters several characteristics that give them an advantage
+in a particular terrain type. These characteristics included eyesight,
+legs, fins (for water) and wings (for crossing impassable terrain). We
+then faced two choices when combining the idea of critter characteristics
+with breeding:</font>
+<ul>
+<li>
+<font color="#FFFF80">Create several species with fixed characteristics
+inherited by each succeeding generation</font></li>
+
+<li>
+<font color="#FFFF80">Create a few species with predefined initial characteristics
+that can change between generations</font></li>
+</ul>
+<font color="#FFFF80">We chose to implement inherited, modifiable characteristics.
+There were three obvious ways to do this:</font>
+<ul>
+<li>
+<font color="#FFFF80">Asexual breeding (spawning with random mutations)</font></li>
+
+<li>
+<font color="#FFFF80">2 partner breeding (same sex)</font></li>
+
+<li>
+<font color="#FFFF80">2 partner breeding (different sexes)</font></li>
+</ul>
+<font color="#FFFF80">We chose to use two-partner, same sex breeding, because
+we were unsure how often two critters of the right age and different sexes
+would meet. Using just one sex eliminated one of these uncertainties, while
+providing a larger 'gene pool' of potential characteristics than asexual
+spawning with random mutations.</font>
+<p><font color="#FFFF80">Implementing inherited, modifiable characteristics
+changed the focus of the project somewhat. Instead of simulating a simple
+ecosystem with a few competing, pre-defined species the project was now
+an ideal vehicle to demonstrate the theory of evolution. As species evolved,
+their distribution throughout the map</font>
+<p><font color="#FFFF80">Displaying the results of the simulation to the
+user can be implemented graphically, by drawing the map on the screen with
+information about the terrain and the individual critters occupying each
+square. Updating the map after each simulation cycle would show the user
+what was happening to the critters and the terrain. With sufficiently detailed
+glyphs, a large amount of information can be quickly communicated to the
+user about each critter -size, energy and characteristics - and each map
+square - food levels, terrain type, altitude. However, the user might also
+wish to see overall trends in the critter population of energy levels,
+age and particular critter characteristics.</font>
+<ul>
+<li>
+<a href="http://www.doc.ic.ac.uk/~pjf98/map.html">Example of a map</a></li>
+
+<li>
+<a href="http://www.doc.ic.ac.uk/~pjf98/control.html">Critters Client Control</a></li>
+
+<li>
+<a href="http://www.doc.ic.ac.uk/~pjf98/stats.html">Example statistics
+window</a></li>
+
+<br>&nbsp;</ul>
+<font color="#FFFF80">Two methods of displaying these statistics were defined
+- as line graphs and histograms. Both types of graph would be updated after
+each simulation cycle, but the line graph would show the selected values
+(represented as height over time) by shifting previous values left, and
+adding new values on the right. Each cycle's portion of the graph would
+be only one or two pixels wide, allowing information generated over a long
+time period to be easily communicated to the user who infrequently looks
+at the statistics windows.</font>
+<br><font color="#FFFF80">A histogram gives more detailed information,
+particularly with regard to the distribution of values over a given range,
+but cannot show long term trends.</font>
+<br><font color="#FFFF80">Implementing the two types of graph is clearly
+desirable since they complement each other well and fulfil different needs;
+however, if resources do not permit both types to be implemented, the long
+term trends illustrated by a line graph would be of more use than the 'snapshot'
+histogram view.</font>
+<h1>
+<a NAME="IMPLEMENTATION"></a><b><font color="#3366FF">Implementation of
+the Project</font></b></h1>
+
+<p><br><font color="#FFFF80">The next design choices we faced were platform
+and language. We decided to write our program in C++ linked with the GTK
+1.2 windowing libraries on Linux because:</font>
+<ul>
+<li>
+<font color="#FFFF80">MS Windows makes it hard to write modular applications</font></li>
+
+<li>
+<font color="#FFFF80">Linux has excellent TCP/IP support and standard networking
+libraries</font></li>
+
+<li>
+<font color="#FFFF80">The GTK object model is easy to learn and use</font></li>
+
+<li>
+<font color="#FFFF80">C++ allows easy and transparent access to the GTK
+object model</font></li>
+</ul>
+<font color="#FFFF80">Once we had decided to use TCP/IP to communicate
+between modules, we realised that:</font>
+<ul>
+<li>
+<font color="#FFFF80">This allowed the simulation to be calculated on one
+machine and displayed over the network on another machine</font></li>
+
+<li>
+<font color="#FFFF80">The simulation engine was fairly portable - to run
+it on another platform simply meant recompiling with the appropriate network
+libraries</font></li>
+</ul>
+
+<h1>
+<a NAME="CRITICISM"></a><b><font color="#3366FF">Criticism of the Project
+Implementation</font></b></h1>
+
+<p><br><font color="#FFFF80">The current implementation does not allow
+the user to track or uniquely identify individual critters as they move
+around the map. Moreover, one cannot select a critter and discover its
+age, energy level or characteristics. Some of these values are represented
+graphically, but not wholly intuitively.</font>
+<p><font color="#FFFF80">It could be argued that this is not a major problem,
+since critters do not live for long, and the thrust of the project was
+to create stable, long-term ecosystems. The characteristics of individual
+critters are not important, since the statistics windows show both long
+term trends and snapshot views of the system as a whole.</font>
+<p><font color="#FFFF80">However, if maps are large enough and varied,
+a long simulation should show distinct species evolving in different areas
+of terrain and altitude. It would not be possible to demonstrate clearly
+the differences between groups of critters in different areas. Graphical
+representations of the critters are useful, but not sufficiently clear,
+especially to a new or impatient user who has not read the 'Critters' documentation.</font>
+<p><font color="#FFFF80">Overall, this feature is not essential and does
+not detract from the project as it stands; it would merely be a nice feature
+to have if the project were developed further.</font>
+<p><font color="#FFFF80">There is no command line scripting language. This
+idea was discussed briefly at the planning stage of the project, and provision
+was made in the network protocol for scripts, but time did not allow us
+to implement it. As with the tracking of individual critters, this feature
+would have enhanced the program a little, but would have required the user
+to learn a new syntax and set of procedures and to have a good mental model
+of the simulation engine. It would rarely have been used and is not a great
+loss.</font>
+<p><font color="#FFFF80">When new critters are created, they are placed
+on the map at random. Thus, a user cannot construct 'scenarios' for the
+critters, but must just blindly hope. This is not ideal, and makes the
+simulations fairly random and unscientific affairs. It could of course
+be argued that it closely resembles real-life in this respect, since no-one
+(with the possible exception of some supernatural being) has yet created
+life from scratch and set it loose on virgin territory. Overall, the lack
+of this feature detracts from the program.</font>
+<p><font color="#FFFF80">Creating new species of critters and editing the
+characteristics of existing critters is poorly documented and text-based.
+For a serious simulation tool, the difficulty of these tasks definitely
+detracts from the functionality of the program. A graphical tool could
+have been provided to allow easy loading and construction, but there was
+not enough time to write this.</font>
+<p><font color="#FFFF80">The critters only have a certain number of behaviours
+and characteristics, and move around in a small number of terrain types.
+All of these variables were arbitrarily chosen and their effects pre-defined.
+Thus, we are not really simulating evolution or breeding per se, but a
+small, defined subset with a large but finite number of possible outcomes.
+Additionally, the critters' behaviour, while it can evolve, is fixed for
+the lifetime of a critter, though this is slightly mitigated by the fact
+that critters with absurd behaviour patterns will die before they can have
+too many offspring.</font>
+<br>&nbsp;
+<h1>
+<a NAME="CONCLU"></a><b><font color="#3366FF">Conclusions</font></b></h1>
+
+<p><br><font color="#FFFF80">The original project brief was very basic,
+and did not ask to us to recreate the universe in software. We successfully
+defined and simulated an ecosystem, showing the effects of natural selection
+in a small, defined and stable ecosystem. Failing to implement artificial
+intelligence in the course of a four week first year undergraduate project
+can probably be forgiven. While a number of interface features were not
+fully implemented, these were not essential and do not detract seriously
+from the project.</font>
+<p><font color="#FFFF80">The project runs well, has a good range of critters
+and produces stable ecosystems with minimal user intervention. It has a
+fairly intuitive interface and it calculates and smoothly displays fast
+simulations with large maps and many critters.</font>
+<br>&nbsp;
+<h1>
+<a NAME="BIBLIO"></a><b><font color="#3366FF">Bibliography and suggested
+further reading</font></b></h1>
+
+<p><br><font color="#FFFF80">The Society of Mind, Marvin Minsky, Simon
+&amp; Schuster, ISBN 0671657135</font>
+<br><font color="#FFFF80">Art of Human-Computer Interface Design, Brenda
+Laurel (Ed.), Addison-Wesley, ISBN 0201517973</font>
+<br><font color="#FFFF80">Swarm Simulation System, Chris Langton et al.,<a href="http://www.santafe.edu/projects/swarm/" target="new1">http://www.santafe.edu/projects/swarm/</a>,
+Santa Fe Institute</font>
+<br><font color="#FFFF80">The Tierra System, Tom Ray, <a href="http://www.hip.atr.co.jp/~ray/tierra/tierra.html" target="new2">http://www.hip.atr.co.jp/~ray/tierra/tierra.html</a></font>
+<br><font color="#FFFF80">The Gods of Sugerscape, Ivars Peterson, <a href="http://www.sciencenews.org/sn_arch/11_23_96/bob1.htm" target="new3">http://www.sciencenews.org/sn_arch/11_23_96/bob1.htm</a></font>
+<br><font color="#FFFF80">What's it all about, Alife?, Robert Crawford,<a href="http://www.techreview.com/articles/apr96/Crawford.html" target="new4">http://www.techreview.com/articles/apr96/Crawford.html</a>,
+MIT Technology Review</font>
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<ul>&nbsp;</ul>
+
+</body>
+</html>

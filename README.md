@@ -1,3 +1,3 @@
 # My attic
 
-Mementos from the mid-90s.
+Mementos from around 1995 to 2005.

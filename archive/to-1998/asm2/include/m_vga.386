@@ -1,0 +1,192 @@
+
+; last updated: 12-02-97
+
+; VGA functions
+
+MISC_Output_Read equ 03CCh
+MISC_Output_Write equ 03C2h
+MISC_Input_Status0 equ 03C2h
+MISC_Input_Status1 equ 03DAh
+;Miscellaneous
+
+CRTC_Index_Read equ 03B4h
+CRTC_Index_Write equ 03D4h
+CRTC_Data_Read equ 3B5h
+CRTC_Data_Write equ 3D5h
+;CRTC registers
+Horizontal_Total equ 0
+Horizontal_Display_End equ 1
+Horizontal_Blank_Start equ 2
+Horizontal_Blank_End equ 3
+Horizontal_Sync_Start equ 4
+Horizontal_Sync_End equ 5
+Vertical_Total equ 6
+OverFlow equ 7
+Initial_Row_Address equ 8
+Maximum_Row_Address equ 9
+Cursor_Start_Pointer equ 0Ah
+Cursor_End_Pointer equ 0Bh
+Linear_Starting_Address_High equ 0Ch
+Linear_Starting_Address_Low equ 0Dh
+Cursor_Address_High equ 0Eh
+Cursor_Address_Low equ 0Fh
+Vertical_Sync_Start equ 10h
+Vertical_Sync_End equ 11h
+Vertical_Display_End equ 12h
+Row_Offset equ 13h
+Underline_Location equ 14h
+Vertical_Blank_Start equ 15h
+Vertical_Blank_End equ 16h
+CRTC_Mode equ 17h
+Line_Compare equ 18h
+
+GC_Index equ 03CEh
+GC_Data equ 03CFh
+;GC registers
+Set_Reset equ 0
+Enable_Set_Reset equ 1
+Color_Compare equ 2
+Function_Select equ 3
+Read_Plane_Select equ 4
+GDC_Mode equ 5
+Miscellaneous equ 6
+Color_Care equ 7
+Bit_Mask equ 8
+
+SC_Index equ 03C4h
+SC_Data equ 03C5h
+;SC registers
+Reset equ 0
+SC_Mode equ 1
+Write_Plane_Mask equ 2
+Font_Select equ 3
+Memory_Mode equ 4
+
+
+MISC_Write MACRO Port,data
+    mov  dx,Port
+    mov  al,data
+    out  dx,al
+    ENDM
+
+MISC_Read MACRO Port,data
+    mov  dx,Port
+    in   al,dx
+    mov  data,al
+    ENDM
+
+CRTC_Write MACRO index,data
+    mov  dx,CRTC_Index_Write
+    mov  al,index
+    mov  ah,data
+    out  dx,ax
+    ENDM
+
+CRTC_Read MACRO index,data
+    mov  dx,CRTC_Index_Read
+    mov  al,index
+    out  dx,al
+    inc  dx
+    in   al,dx
+    mov  data,al
+    ENDM
+
+GC_Write MACRO index,data
+    mov  dx,GC_Index
+    mov  al,index
+    mov  ah,data
+    out  dx,ax
+    ENDM
+
+GC_Read MACRO index,data
+    mov  dx,GC_Index
+    mov  al,index
+    out  dx,al
+    inc  dx
+    in   al,dx
+    mov  data,al
+    ENDM
+
+SC_Write MACRO index,data
+    mov  dx,SC_Index
+    mov  al,index
+    mov  ah,data
+    out  dx,al
+    ENDM
+
+SC_Read MACRO index,data
+    mov  dx,SC_Index
+    mov  al,index
+    out  dx,al
+    inc  dx
+    in   al,dx
+    mov  data,al
+    ENDM
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+; switch to Mode X 
+Mode_X PROC
+    mov  ax,13h
+    int  10h
+
+    mov  dx,SC_Index
+    mov  ax,0604h
+    out  dx,ax
+    mov  ax,0100h
+    out  dx,ax
+
+    mov  dx,MISC_Output_Write
+    mov  al,0E3h
+    out  dx,al
+
+    mov  dx,SC_Index
+    mov  ax,0300h
+    out  dx,ax
+
+    mov  dx,CRTC_Index_Write
+    mov  al,11h
+    out  dx,al
+    inc  dx
+    in   al,dx
+    and  al,07Fh
+    out  dx,al
+    dec  dx
+
+    mov  ax,00D06h
+    out  dx,ax
+    mov  ax,03E07h
+    out  dx,ax
+    mov  ax,04109h
+    out  dx,ax
+    mov  ax,0EA10h
+    out  dx,ax
+    mov  ax,0AC11h
+    out  dx,ax
+    mov  ax,0DF12h
+    out  dx,ax
+    mov  ax,00014h
+    out  dx,ax
+    mov  ax,0E715h
+    out  dx,ax
+    mov  ax,00616h
+    out  dx,ax
+    mov  ax,0E317h
+    out  dx,ax
+
+    mov  dx,SC_Index
+    mov  ax,0F02h
+    out  dx,ax
+    mov  ax,0A000h
+    mov  es,ax
+    sub  di,di
+    sub  ax,ax
+    mov  cx,8000h
+    cld
+    rep  stosw
+
+    ret
+Mode_X ENDP
+
+Code ENDS

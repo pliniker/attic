@@ -1,0 +1,39 @@
+<pre>
+<tt>
+<font color=#9A1900>/**
+ * Transaction.java
+ *
+ *
+ * Created: Wed Jun 13 15:46:49 2001
+ *
+ * @author Peter Fordham
+ * @version
+ */</font>
+
+<font color=#0000FF>package</font> uk.ac.ic.doc.ise3.sp;
+<font color=#0000FF>import</font> java.io.*;
+
+<font color=#0000FF>class</font> Transaction  
+{
+    <font color=#0000FF>private</font> <font color=#009900>int</font> amount,person;
+    <font color=#0000FF>private</font> <font color=#009900>long</font> time;
+    <font color=#0000FF>private</font> String comment;
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> getAmount() { <font color=#0000FF>return</font> amount; }
+    
+    <font color=#0000FF>public</font> Transaction(<font color=#009900>int</font> a, <font color=#009900>int</font> p, String c)
+    {
+		time = BankImpl.s_getTime();
+		comment = c;
+		amount = a;
+		person = p;
+    }
+    
+    <font color=#0000FF>public</font> <font color=#009900>int</font> printStatementLine(<font color=#009900>int</font> runningTotal,PrintStream psout)
+    {
+		psout.println(<font color=#FF0000>"£"</font> + runningTotal + <font color=#FF0000>"\t£"</font> + amount + <font color=#FF0000>"\t"</font> + person + <font color=#FF0000>"\t"</font> + time + <font color=#FF0000>"\t"</font> + comment);
+		<font color=#0000FF>return</font> runningTotal + amount;
+    }
+} 
+</tt>
+</pre>

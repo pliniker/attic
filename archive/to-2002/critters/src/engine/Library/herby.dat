@@ -1,0 +1,26 @@
+[Identification]
+Name=HERBY
+Description1=Hello
+Description2=This is a description
+Description3=Testing
+Description4=1 2 3 4
+
+[Parameters]
+Type=D10
+Size=D25
+FoodMask=D255
+Terrain=D253
+NumSegs=D4
+Other2=D55
+Segment0=D0
+Segment1=D1
+Segment2=D2
+Segment3=D3
+Segment4=D5
+Segment5=D6
+Segment6=D7
+Segment7=D8
+Segment8=D9
+Segment9=D0
+
+[Behaviour]

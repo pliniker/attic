@@ -1,0 +1,199 @@
+; draws a real plasma
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+; macro to reset counter to 0
+ResetSine MACRO resetme,returnto
+    mov  resetme,0
+    jmp  returnto
+    ENDM
+
+; when the counters reach 360, reset them to 0
+ResetComplexSineX1:
+    ResetSine XCtr1,continueX1
+ResetComplexSineX2:
+    ResetSine XCtr2,continueX2
+
+ResetComplexSineY1:
+    ResetSine YCtr1,continueY1
+ResetComplexSineY2:
+    ResetSine YCtr2,continueY2
+
+; Apply the plasma to the screen
+DrawPlasma PROC NEAR
+    mov  si,320 * 0
+    mov  cx,0
+    YLoop:
+
+        mov  dx,0
+        XLoop:
+
+            mov  di,dx
+            mov  ah,XArray[di]
+            mov  di,cx
+            mov  al,YArray[di]
+            add  al,ah
+
+            mov  gs:[si],al
+            inc  si
+
+            inc  dx
+            cmp  dx,319
+            jbe  XLoop
+
+        inc cx
+        cmp cx,199
+        jbe YLoop    
+    ret
+DrawPlasma ENDP
+
+; fill the XArray with values
+XSineLoop PROC NEAR
+    mov  X,0
+    SineLoopX:
+                
+        mov  ax,XCtr1
+        CosSin ax
+        mov  ebx,eax
+        mov  ax,XCtr2
+        CosSin ax
+        add  edx,ebx
+
+        imul edx,32
+        shr  edx,16
+
+        mov  si,X
+        mov  XArray[si],dl
+
+        mov  ax,X1incr
+        add  XCtr1,ax
+        cmp  XCtr1,360
+        jge  ResetComplexSineX1
+        continueX1:
+
+        mov  ax,X2incr
+        add  XCtr2,ax
+        cmp  XCtr2,360     
+        jge  ResetComplexSineX2
+        continueX2:
+        
+    inc X
+    cmp X,319
+    jbe SineLoopX
+    ret
+XSineLoop ENDP
+
+; fill the YArray with values
+YSineLoop PROC NEAR
+    mov  Y,0 
+    SineLoopY:
+                
+        mov  ax,YCtr1
+        CosSin ax
+        mov  ebx,eax
+        mov  ax,YCtr2
+        CosSin ax
+        add  edx,ebx
+
+        imul edx,32
+        shr  edx,16
+
+        mov  si,Y
+        mov  YArray[si],dl
+
+        mov  ax,Y1incr
+        add  YCtr1,ax
+        cmp  YCtr1,360
+        jge  ResetComplexSineY1
+        continueY1:
+
+        mov  ax,Y2incr
+        add  YCtr2,ax
+        cmp  YCtr2,360     
+        jge  ResetComplexSineY2
+        continueY2:
+        
+    inc Y
+    cmp Y,199
+    jbe SineLoopY
+    ret
+YSineLoop ENDP
+
+ResetAddValue1:
+    mov  AddValue1,0
+    jmp  continueAddValue1
+ResetAddValue2:
+    mov  AddValue2,0
+    jmp  continueAddValue2
+ResetAddValue3:
+    mov  AddValue3,0
+    jmp  continueAddValue3
+ResetAddValue4:
+    mov  AddValue4,0
+    jmp  continueAddValue4
+
+
+; main program loop
+DrawRealPlasma PROC NEAR
+    push ds
+    mov  ax,0A000h
+    mov  gs,ax
+    mov  ax,Code
+    mov  ds,ax
+
+            cmp  AddValue1,360
+            jge  ResetAddValue1
+            continueAddValue1:
+            cmp  AddValue2,360
+            jge  ResetAddValue2
+            continueAddValue2:
+            cmp  AddValue3,360
+            jge  ResetAddValue3
+            continueAddValue3:
+            cmp  AddValue4,360
+            jge  ResetAddValue4
+            continueAddValue4:
+
+            mov  XCtr1,359
+            mov  XCtr2,0
+            mov  ax,AddValue1
+            sub  XCtr1,ax
+            mov  ax,AddValue2
+            add  XCtr2,ax
+            mov  YCtr1,359
+            mov  YCtr2,0
+            mov  ax,AddValue3
+            sub  YCtr1,ax
+            mov  ax,AddValue4
+            add  YCtr2,ax
+
+            call XSineLoop
+            call YSineLoop
+            call DrawPlasma
+
+    pop  ds
+    ret
+DrawRealPlasma ENDP
+
+    X1incr dw 1
+    X2incr dw 2
+    Y1incr dw 5
+    Y2incr dw 1
+    AddValue1 dw 1
+    AddValue2 dw 1
+    AddValue3 dw 1
+    AddValue4 dw 1
+
+    X       dw  0
+    Y       dw  0
+             
+    XCtr1 dw 0
+    XCtr2 dw 0
+    YCtr1 dw 0
+    YCtr2 dw 0
+
+    XArray db 320 dup (?)
+    YArray db 200 dup (?)
+
+Code ENDS

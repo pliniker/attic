@@ -1,0 +1,101 @@
+; This segment contains the data for loading VOC files
+
+MusicSeg  segment word 'MusicSeg' USE16
+SName       db 'SND1.RAW'
+SHandle     dw 0
+S1Data      db 65000 dup(?)
+MusicSeg  ends
+
+
+Code SEGMENT 'CODE' WORD USE16 PUBLIC
+ASSUME cs:Code,ds:Code
+
+SLoad PROC NEAR    
+    SetDs MusicSeg
+    OpenFile    SName,00h
+    mov  SHandle,ax
+    call IfError
+    ReadFile    SHandle,S1Data,64000
+    call IfError
+    CloseFile   SHandle
+    call IfError
+    ret
+SLoad ENDP
+    
+SBReset PROC NEAR
+    mov  dx,226h
+    mov  al,1
+    out  dx,al
+    mov  dx,226h
+    mov  al,0
+    out  dx,al
+    mov  cx,0
+    mov  al,0
+ResetLoop:
+    mov  dx,22Eh
+    in   al,dx
+    mov  dx,22Ah
+    in   al,dx
+    inc  cx
+    cmp  cx,100
+    je   ExitResetLoop
+    cmp  al,0AAh
+    jne  ResetLoop
+ExitResetLoop:
+    ret
+SBReset ENDP
+
+DSPWrite MACRO data
+local DSPLoop
+    mov  dx,22Ch
+DSPLoop:
+    in   al,dx
+    cmp  al,128
+    jae  DSPLoop
+    mov  al,data
+    out  dx,al
+    ENDM
+    
+PlaySample PROC NEAR
+
+    mov  al,5h
+    out  0Ah,al
+    mov  al,0
+    out  0Ch,al
+    mov  al,49h
+    out  0Bh,al
+
+    mov  ax,seg S1Data
+    shl  eax,4
+    add  ax,offset S1Data
+    out  02h,al
+    shr  eax,8
+    out  02h,al
+    shr  eax,8
+    out  83h,al
+    shr  eax,8
+    mov  dx,483h
+    out  dx,al
+
+    mov  ax,65000
+    out  03h,al
+    shr  ax,8
+    out  03h,al
+
+    DSPWrite 40h
+    DSPWrite 166
+
+    DSPWrite 14h
+    mov  bx,65000
+    sub  bl,1
+    sub  bh,1
+    DSPWrite bl
+    DSPWrite bh
+
+    mov  al,1
+    out  0Ah,al
+
+    ret
+    ENDP
+
+Code ENDS

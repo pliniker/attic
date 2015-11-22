@@ -1,0 +1,111 @@
+
+; last updated: 10-04-97
+
+DecP equ '.'
+
+return MACRO
+    mov  WorkSpace[0],13
+    mov  WorkSpace[1],10
+    mov  WorkSpace[2],'$'
+    mov  ah,09h
+    mov  dx,offset WorkSpace
+    int  21h
+    ENDM
+
+OutHex8 MACRO var
+    xor  bx,bx
+    mov  bl,var
+    mov  cl,' '
+    call OutHex
+    ENDM
+
+OutHex16 MACRO var
+    xor  bx,bx
+    mov  bx,var
+    mov  cl,' '
+    call OutHex
+    ENDM
+
+OutHex32 MACRO var
+    pusha
+    xor  ebx,ebx
+    mov  ebx,var
+    shr  ebx,16
+    call OutHex
+    mov  ebx,var
+    call OutHex
+    popa
+    ENDM
+
+Code    SEGMENT 'CODE' USE16 PUBLIC
+        ASSUME  cs:Code,ds:Code
+
+WorkSpace db 32 dup (?)
+
+MemFree db 0,0,0,0,'$'
+
+OutHex PROC NEAR
+    push ds
+    pusha
+    push cx
+    push bx
+
+    mov  ax,@code
+    mov  ds,ax
+    mov  cl,12
+    and  bx,1111000000000000b
+    shr  bx,cl
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE91
+    jmp  SKIPA
+ABOVE91:
+    add  bl,7
+SKIPA:
+    mov  MemFree[0],bl
+    pop  bx
+    push bx
+    mov  cl,8
+    and  bx,0000111100000000b
+    shr  bx,cl
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE92
+    jmp  SKIPB
+ABOVE92:
+    add  bl,7
+SKIPB:
+    mov  MemFree[1],bl
+    pop  bx
+    push bx
+    mov  cl,4
+    and  bx,0000000011110000b
+    shr  bx,cl
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE93
+    jmp  SKIPC
+ABOVE93:
+    add  bl,7
+SKIPC:
+    mov  MemFree[2],bl
+    pop  bx
+    and  bx,0000000000001111b
+    add  bl,30h
+    cmp  bl,39h
+    ja   ABOVE94
+    jmp  SKIPD
+ABOVE94:
+    add  bl,7
+SKIPD:
+    mov  MemFree[3],bl
+    pop  cx
+    mov  ah,09h
+    mov  dx,offset MemFree
+    int  21h
+    popa
+    pop  ds
+    ret
+OutHex ENDP
+
+Code ENDS
